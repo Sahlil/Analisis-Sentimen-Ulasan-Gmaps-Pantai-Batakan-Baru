@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Simulasi Pengujian Model</h1>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white">
+                <i class="bi bi-robot"></i> Uji Coba Sentimen
+            </div>
+            <div class="card-body">
+                <p>Ketik ulasan baru di bawah ini untuk menguji kecerdasan model yang telah dilatih.</p>
+                
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Masukkan Kalimat Ulasan:</label>
+                        <textarea name="teks_input" class="form-control" rows="4" placeholder="Contoh: Pantainya indah tapi sayangnya banyak sampah..." required>{{ teks_awal }}</textarea>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search"></i> Analisis Sentimen Sekarang
+                        </button>
+                    </div>
+                </form>
+
+                {% if hasil %}
+                <div class="mt-4 text-center animate__animated animate__fadeIn">
+                    <hr>
+                    <h5>Hasil Prediksi:</h5>
+                    
+                    {% if hasil == 'Positif' %}
+                        <h1 class="display-4 text-success fw-bold">POSITIF</h1>
+                        <div class="alert alert-success">Sistem mendeteksi nada kepuasan dalam kalimat ini.</div>
+                    
+                    {% elif hasil == 'Negatif' %}
+                        <h1 class="display-4 text-danger fw-bold">NEGATIF</h1>
+                        <div class="alert alert-danger">Sistem mendeteksi keluhan atau kekecewaan.</div>
+                    
+                    {% else %}
+                        <h1 class="display-4 text-secondary fw-bold">NETRAL</h1>
+                        <div class="alert alert-secondary">Kalimat ini cenderung datar atau informatif saja.</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -4,6 +4,7 @@ from flask_login import login_required, current_user
 from app import db
 from app.models import Ulasan
 from app.lib.preprocessing import preprocess_text, label_sentiment
+from app.lib.machine_learning import train_naive_bayes, predict_single
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -92,3 +93,40 @@ def proses_preprocessing():
     flash(f'Berhasil memproses {jumlah} ulasan.', 'success')
     return redirect(url_for('admin.data_ulasan'))
 
+@admin_bp.route('/training_model')
+@login_required
+def training_model():
+    return render_template('admin/training_model.html')
+
+@admin_bp.route('/proses_training', methods=['POST'])
+@login_required
+def proses_training():
+    hasil = train_naive_bayes()
+
+    if hasil['status'] == 'error':
+        flash(hasil['msg'], 'danger')
+    else:
+        flash(f"Model berhasil dilatih dengan akurasi {hasil['akurasi']}%", 'success')
+        return render_template('admin/training_model.html', hasil=hasil)
+
+    return redirect(url_for('admin.training_model'))
+
+
+@admin_bp.route('/simulasi', methods=['GET', 'POST'])
+@login_required
+def simulasi():
+    hasil_prediksi = None
+    teks_input = ''
+
+    if request.method == 'POST':
+        teks_input = request.form.get('teks_input')
+
+        print(teks_input)
+
+        if teks_input:
+            hasil_prediksi = predict_single(teks_input)
+            print(hasil_prediksi)
+
+    return render_template('admin/simulasi.html',
+                           hasil=hasil_prediksi,
+                           teks_input=teks_input)
