@@ -1,28 +1,29 @@
 NORMALISASI = {
     # Kata ganti dan umum
     "sy": "saya", "aq": "saya", "aku": "saya", "gw": "saya", "gue": "saya",
+    "ulun": "saya", "uln": "saya",
     "skrg": "sekarang", "skrng": "sekarang", "skarang": "sekarang",
-    "bgt": "banget", "bngt": "banget", "bangeet": "banget",
+    "bgt": "banget", "bngt": "banget", "bangeet": "banget", "bangettt": "banget", "bgd": "banget", "banged": "banget",
     "gk": "tidak", "ga": "tidak", "gak": "tidak", "tdk": "tidak",
     "no": "tidak", "nggak": "tidak", "ngga": "tidak",
-    "jg": "juga", "jga": "juga",
+    "jg": "juga", "jga": "juga", "jua": "juga",
     "yg": "yang", "yng": "yang",
     "org": "orang", "orng": "orang",
     "dgn": "dengan", "dngn": "dengan", "dg": "dengan",
     "dpt": "dapat", "dpet": "dapat",
-    "tp": "tapi", "tpi": "tapi", "tapi": "tapi",
+    "tp": "tapi", "tpi": "tapi",
     "trs": "terus", "trus": "terus",
-    "udh": "sudah", "udah": "sudah", "sdh": "sudah",
+    "udh": "sudah", "udah": "sudah", "sdh": "sudah", "dah": "sudah",
     "blm": "belum", "blum": "belum",
     "sm": "sama", "sma": "sama",
-    "kmu": "kamu", "km": "kamu", "lu": "kamu",
+    "kmu": "kamu", "lu": "kamu",
     "klo": "kalau", "kl": "kalau", "kalo": "kalau",
-
-    # Umpatan dan ekspresi
-    "anjay": "anjing", "anjir": "anjing", "anjrit": "anjing",
-    "cuy": "coy", "coy": "teman",
-    "dah": "sudah", "deh": "saja",
-    "nih": "ini", "nye": "nya",
+    "pian": "anda",
+    "deh": "saja",
+    "anjay": "anjing", "anjir": "anjing", "anjrit": "anjing", "anjayy": "anjing", "anjirr": "anjing",
+    "cuy": "teman",
+    "nih": "ini",
+    "nye": "nya",
 
     # Singkatan umum
     "ad": "ada",
@@ -30,29 +31,27 @@ NORMALISASI = {
     "bgs": "bagus", "baguzz": "bagus", "bagusss": "bagus",
     "krn": "karena", "karna": "karena", "krna": "karena",
     "utk": "untuk", "untk": "untuk",
-    "mantul": "mantap betul", "mantap": "mantap",
+    "mantul": "mantap betul", "mantapp": "mantap", "mantappp": "mantap",
     "sgt": "sangat", "sngt": "sangat",
-    "bgd": "banget", "banged": "banget",
-    "bngt": "banget", "bangeet": "banget",
-    "bner": "benar", "bener": "benar",
+    "bner": "benar", "bener": "benar", "banar": "benar",
     "bgtu": "begitu", "gitu": "begitu",
     "brp": "berapa", "brpa": "berapa",
-    "cm": "cuma", "cuma": "hanya",
+    "cm": "hanya",
     "dll": "dan lain-lain",
     "dlm": "dalam",
     "dr": "dari",
-    "dsni": "disini", "disini": "di sini",
+    "dl": "dulu",
+    "dsni": "di sini",
     "gmn": "bagaimana", "gimana": "bagaimana",
     "hrs": "harus", "hrus": "harus",
     "jd": "jadi",
     "kcil": "kecil", "kecill": "kecil",
-    "kyk": "seperti", "kayak": "seperti",
+    "kyk": "seperti", "kayak": "seperti", "kykny": "kayaknya",
     "lbh": "lebih",
     "lg": "lagi",
     "mksd": "maksud", "mksud": "maksud",
     "msh": "masih", "msih": "masih",
-    "murah": "murah", "murahh": "murah",
-    "nggak": "tidak", "ngga": "tidak",
+    "murahh": "murah",
     "pdhl": "padahal",
     "plg": "paling",
     "prlu": "perlu",
@@ -62,140 +61,96 @@ NORMALISASI = {
     "sgala": "segala",
     "smpai": "sampai",
     "smua": "semua",
-    "sneng": "senang", "seneng": "senang",
-    "t4": "tempat", "tempat": "tempat",
+    "sneng": "senang", "seneng": "senang", "himung": "senang",
+    "t4": "tempat",
     "td": "tadi",
     "trima": "terima",
-    "udah": "sudah",
     "yaa": "ya", "yaaa": "ya",
+    "bwanyak": "banyak", "bnyak": "banyak",
+    "bkn": "bukan",
 
-    # Kata khusus dari ulasan
+    # Kata khusus
     "pengen": "pingin", "pengin": "pingin",
     "mo": "mau",
     "tu": "itu",
     "deket": "dekat",
-    "kereen": "keren", "kerenn": "keren",
-    "pengunjung": "pengunjung", "pengunjungg": "pengunjung",
+    "kereen": "keren", "kerenn": "keren", "kerennn": "keren", "kece": "keren", "kecee": "keren",
+    "pengunjungg": "pengunjung",
     "pantainya": "pantai", "pantaii": "pantai",
     "sunsetnya": "sunset", "sunsetnyaa": "sunset",
     "wahanaa": "wahana", "wahananya": "wahana",
     "penginapannya": "penginapan", "penginapann": "penginapan",
-
-    # Kata serapan dan slang
-    "ok": "oke", "oke": "oke",
+    "ok": "oke",
     "thanks": "terima kasih", "thx": "terima kasih",
     "plis": "tolong", "please": "tolong",
     "sorry": "maaf", "sori": "maaf",
-
-    # Kata dengan pengulangan huruf
-    "bangettt": "banget", "bagusss": "bagus",
-    "kerennn": "keren", "asikk": "asik",
-    "puass": "puas", "ramahh": "ramah",
-    "jelekk": "jelek", "mahall": "mahal",
-    "kotorr": "kotor", "bersihh": "bersih",
-
-    # Kata dengan typo umum
-    "dijamin": "dijamin", "dijaminn": "dijamin",
-    "pemandangan": "pemandangan", "pemandangann": "pemandangan",
-    "fasilitas": "fasilitas", "fasilitass": "fasilitas",
-    "kebersihan": "kebersihan", "kebersihann": "kebersihan",
-    "kenyamanan": "kenyamanan", "kenyamanann": "kenyamanan",
-    "jauuuhhhhh": "jauh",
-
-    # Tambahan dari analisis data
-    "gas": "pergi", "gas": "ayo",
-    "mantapp": "mantap", "mantappp": "mantap",
-    "joss": "bagus", "jos": "bagus",
-    "gemes": "gemas", "gemess": "gemas",
-    "kece": "keren", "kecee": "keren",
-    "geratis": "gratis", "gratiss": "gratis",
-    "parahh": "parah", "parahhh": "parah",
-    "anjayy": "anjing", "anjirr": "anjing",
-
-    "ulun": "saya",
-    "uln": "saya",
-    "pian": "anda",
     "gas": "ayo",
-    "jua": "juga",
-    "banar": "benar",
     "srek": "cocok",
-    "kykny": "kayaknya",
-    "dpet": "dapat",
-    "bwanyak": "banyak",
-    "bnyak": "banyak",
-    "sm": "sama",
-    "pdhl": "padahal",
-    "klo": "kalau",
-    "krn": "karena",
-    "utk": "untuk",
-    "yg": "yang",
-    "org": "orang",
-    "dgn": "dengan",
-    "sdh": "sudah",
-    "blm": "belum",
-    "tpi": "tapi",
-    "trus": "terus",
-    "lg": "lagi",
-    "gak": "tidak",
-    "ga": "tidak",
-    "jg": "juga",
-    "dl": "dulu",
-    "km": "kamu",
-    "kmu": "kamu",
-    "skrg": "sekarang",
-    "bgt": "banget",
-    "bangettt": "banget",
-    "bagusss": "bagus",
-    "kerennn": "keren",
+    "rami": "ramai",
+    "best": "baik",
+    "seru": "asik", "asikk": "asik",
     "puass": "puas",
     "ramahh": "ramah",
     "jelekk": "jelek",
     "mahall": "mahal",
     "kotorr": "kotor",
     "bersihh": "bersih",
-    "mantapp": "mantap",
-    "kece": "keren",
-    "geratis": "gratis",
-    "parahh": "parah",
-    "anjayy": "anjing",
-    "anjirr": "anjing",
-    "himung": "senang",
-    "seneng": "senang",
+    "dijaminn": "dijamin",
+    "pemandangann": "pemandangan",
+    "fasilitass": "fasilitas",
+    "kebersihann": "kebersihan",
+    "kenyamanann": "kenyamanan",
+    "jauuuhhhhh": "jauh",
+    "joss": "bagus", "jos": "bagus",
+    "gemes": "gemas", "gemess": "gemas",
+    "geratis": "gratis", "gratiss": "gratis",
+    "parahh": "parah", "parahhh": "parah",
     "pphon": "pohon",
-    "rami": "ramai",
-    "best": "baik",
-    "seru": "asik",
+    "karcisnyaa": "karcis", "karcisnya": "karcis", "karcisss": "karcis",
+    "duaa": "dua",
+    "rb": "ribu",
+    "nyediakan": "sedia",
+    "gejebo": "gazebo",
 }
 
 LEXICON = {
-        # --- Positif (Sangat Kuat) ---
+    # Positif kuat
     "bagus": 2, "indah": 2, "bersih": 2, "rekomendasi": 2, "mantap": 2,
-    "fotoable": 2, "keren": 2, "puas": 2, "seru": 2, # Tambahan baru
+    "fotoable": 2, "keren": 2, "puas": 2, "seru": 2,
 
-    # --- Positif (Standar) ---
+    # Positif standar
     "nyaman": 1, "ramah": 1, "menarik": 1, "luas": 1, "murah": 1,
     "tenang": 1, "aman": 1, "enak": 1, "baik": 1, "senang": 1,
     "asik": 1, "glamping": 1, "hammock": 1, "spot": 1, "foto": 1,
-    "weekday": 1, "terjangkau": 1,
-    "cocok": 1, # Wajib tambah (muncul 53x)
-    "tidak_mahal": 1, # Artinya murah
+    "weekday": 1, "terjangkau": 1, "cocok": 1,
+    
+    # Negasi positif
+    "tidak_mahal": 2, "tidak_kotor": 2, "tidak_buruk": 2,
+    "tidak_jelek": 2, "tidak_parah": 2,
 
-    # --- Negatif (Sangat Kuat/Fatal) ---
-    "sampah": -2, "kotor": -2, "ribut": -2, "berisik": -2,
-    "parah": -2, "jelek": -2, "kecewa": -2, "buruk": -2,
-    "pungli": -3, "berlumpur": -2, "gatal": -2, "macet": -2, "bau": -2, # Bau ada 2 data
-    "kumuh": -2,
+    # Negatif fatal
+    "sampah": -4, "pungli": -5, "kumuh": -2, "berlumpur": -2,
+    "gatal": -2, "macet": -2, "bau": -2,
 
-    # --- Negatif (Standar) ---
+    # Negatif kuat
+    "kotor": -2, "ribut": -2, "berisik": -2, "parah": -2, 
+    "jelek": -2, "kecewa": -3, "buruk": -2, "karokean": -2,
+    "aneh": -2, "duplikat": -2, "double": -2, "tolong": -2,
+    "perbaiki": -2, "benahi": -2,
+
+    # Negatif standar
     "kurang": -1, "sulit": -1, "panas": -1, "terganggu": -1,
-    "mahal": -1, "karokean": -1, "crowded": -1, "ramai": -1, 
+    "mahal": -3, "crowded": -1, "kok": -1, "tagih": -1, 
+    "bayar": -1, "bingung": -1, "sayang": -1,
 
-    "tidak_bagus": -2, "tidak_rekomendasi": -2, "tidak_bersih": -2, "tidak_mantap": -2,
-    "kurang_nyaman": -1, # Tambahan dari data
-    "kurang_bagus": -1,  # Tambahan dari data
-    "kurang_bersih": -2, # Tambahan dari data
-    "kurang_puas": -2
+    # Negasi negatif
+    "tidak_bagus": -2, "tidak_rekomendasi": -2, "tidak_bersih": -2, 
+    "tidak_mantap": -2, "kurang_nyaman": -1, "kurang_bagus": -1,
+    "kurang_bersih": -2, "kurang_puas": -2,
+
+    # Konteks khusus
+    "tindak": -3, "dua": -1,
 }
 
-STOPWORD_TAMBAHAN = {"nya", "y", "banget", "lumayan", "sayang", "sih", "dong"}
+STOPWORD_TAMBAHAN = {"nya", "y", "sih", "dong", "tuh", "deh"}
 KATA_NEGASI = {"tidak", "bukan", "jangan", "kurang", "belum"}

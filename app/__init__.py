@@ -31,4 +31,7 @@ def create_app():
         from app.controllers.admin import admin_bp
         app.register_blueprint(admin_bp)
 
+        from app.controllers.user_management import user_bp
+        app.register_blueprint(user_bp)
+
     return app

@@ -73,8 +73,8 @@ def label_sentiment(tokens):
             score += LEXICON[token]
             
     if score > 0:
-        return "Positif"
+        return "positif"
     elif score < 0:
-        return "Negatif"
+        return "negatif"
     else:
-        return "Netral"
+        return "netral"

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Input Ulasan Manual</h1>
+    <a href="{{ url_for('admin.data_ulasan') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Kembali
+    </a>
+</div>
+
+<div class="card shadow">
+    <div class="card-header bg-primary text-white">
+        Form Input Multi-Baris
+    </div>
+    <div class="card-body">
+        <p class="text-muted">Klik tombol <strong>"Tambah Baris Lain"</strong> untuk memasukkan banyak ulasan sekaligus.</p>
+
+        <form method="POST">
+            <div id="container-input">
+                <div class="input-group mb-3">
+                    <span class="input-group-text">1</span>
+                    <textarea name="ulasan[]" class="form-control" placeholder="Ketik ulasan di sini..." required rows="2"></textarea>
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <button type="button" class="btn btn-success" id="btn-tambah">
+                    <i class="bi bi-plus-circle"></i> Tambah Baris Lain
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Simpan Semua Data
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.getElementById('btn-tambah').addEventListener('click', function() {
+        var container = document.getElementById('container-input');
+        
+        // Hitung sudah ada berapa inputan (untuk nomor urut)
+        var count = container.children.length + 1;
+
+        // Buat elemen div baru
+        var newDiv = document.createElement('div');
+        newDiv.className = 'input-group mb-3';
+        
+        // Isi HTML-nya (Input + Tombol Hapus)
+        newDiv.innerHTML = `
+            <span class="input-group-text">${count}</span>
+            <textarea name="ulasan[]" class="form-control" placeholder="Ketik ulasan di sini..." rows="2"></textarea>
+            <button type="button" class="btn btn-danger btn-hapus">
+                <i class="bi bi-trash"></i>
+            </button>
+        `;
+
+        // Masukkan ke container
+        container.appendChild(newDiv);
+
+        // Tambahkan fungsi hapus untuk tombol X yang baru dibuat
+        newDiv.querySelector('.btn-hapus').addEventListener('click', function() {
+            newDiv.remove();
+        });
+    });
+</script>
+{% endblock %}

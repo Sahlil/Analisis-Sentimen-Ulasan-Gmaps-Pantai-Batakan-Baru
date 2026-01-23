@@ -11,7 +11,18 @@ admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 @admin_bp.route('/dashboard')
 @login_required
 def dashboard():
-    return render_template('admin/dashboard.html')
+    total_ulasan = Ulasan.query.count()
+    jml_positif = Ulasan.query.filter_by(label='Positif').count()
+    jml_negatif = Ulasan.query.filter_by(label='Negatif').count()
+    jml_netral = Ulasan.query.filter_by(label='Netral').count()
+    jml_belum = Ulasan.query.filter_by(label=None).count()
+
+    return render_template('admin/dashboard.html', 
+                            total=total_ulasan,
+                            positif=jml_positif,
+                            negatif=jml_negatif,
+                            netral=jml_netral,
+                            belum=jml_belum)
 
 
 @admin_bp.route('/data_ulasan')
@@ -66,7 +77,27 @@ def hapus_ulasan(id):
     flash('Ulasan berhasil dihapus.', 'success')
     return redirect(url_for('admin.data_ulasan'))
     
+@admin_bp.route('/tambah_manual', methods=['GET', 'POST'])
+@login_required
+def tambah_manual():
+    if request.method == 'POST':
+        daftar_ulasan = request.form.getlist('ulasan[]')
 
+        jumlah_suskses = 0
+
+        for teks in daftar_ulasan:
+            if teks.strip():
+                baru = Ulasan(teks_asli=teks)
+                db.session.add(baru)
+                jumlah_suskses += 1
+
+        if jumlah_suskses > 0:
+            db.session.commit()
+            flash(f'Berhasil menambahkan {jumlah_suskses} ulasan.', 'success')
+        else:
+            flash('Tidak ada ulasan yang ditambahkan.', 'warning')
+            
+    return render_template('admin/tambah_manual.html')
 
 @admin_bp.route('/proses_preprocessing')
 @login_required
@@ -77,19 +108,30 @@ def proses_preprocessing():
         flash('Tidak ada data ulasan mentah yang perlu diproses.', 'info')
         return redirect(url_for('admin.data_ulasan'))
 
+    total = len(data_mentah)
+    batch_size = 50
     jumlah = 0
-    for item in data_mentah:
-        tokens = preprocess_text(item.teks_asli)
 
-        clean_text = ' '.join(tokens)
+    for i in range(0, total, batch_size):
+        batch = data_mentah[i:i+batch_size]
+        
+        for item in batch:
+            tokens = preprocess_text(item.teks_asli)
+            clean_text = ' '.join(tokens)
+            label = label_sentiment(tokens)
 
-        label = label_sentiment(tokens)
+            item.teks_clean = clean_text
+            item.label = label
+            jumlah += 1
+            
+            # Log progress setiap 10 item
+            if jumlah % 10 == 0:
+                print(f"Progress: {jumlah}/{total} ({jumlah/total*100:.1f}%)")
+        
+        # Commit per batch untuk mencegah memory overflow
+        db.session.commit()
+        print(f"✅ Batch {i//batch_size + 1} selesai ({jumlah}/{total})")
 
-        item.teks_clean = clean_text
-        item.label = label
-        jumlah += 1
-
-    db.session.commit()
     flash(f'Berhasil memproses {jumlah} ulasan.', 'success')
     return redirect(url_for('admin.data_ulasan'))
 

@@ -1,32 +1,240 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h2>Dashboard Admin</h2>
-    <p>Selamat datang di Sistem Analisis Sentimen Wisata.</p>
+
+<style>
+    /* Styling khusus Dashboard */
+    .card {
+        border: none;
+        border-radius: 15px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
     
-    <div class="row mt-4">
-        <div class="col-md-4">
-            <div class="card text-white bg-primary mb-3">
-                <div class="card-header">Total Ulasan</div>
-                <div class="card-body">
-                    <h5 class="card-title">0 Data</h5> </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card text-white bg-success mb-3">
-                <div class="card-header">Sentimen Positif</div>
-                <div class="card-body">
-                    <h5 class="card-title">0 Data</h5>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card text-white bg-danger mb-3">
-                <div class="card-header">Sentimen Negatif</div>
-                <div class="card-body">
-                    <h5 class="card-title">0 Data</h5>
+    .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+
+    .icon-box {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .stat-label {
+        font-size: 0.85rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+</style>
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-4">
+    <div>
+        <h2 class="fw-bold text-dark">Dashboard Overview</h2>
+        <p class="text-muted mb-0">Ringkasan performa analisis sentimen hari ini.</p>
+    </div>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle">
+            <i class="fas fa-calendar-alt me-2"></i> Minggu Ini
+        </button>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card shadow-sm h-100 card-hover">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <span class="text-muted stat-label">Total Ulasan</span>
+                        <h3 class="fw-bold mt-2 mb-0 text-primary">{{ total }}</h3>
+                        <small class="text-success"><i class="fas fa-arrow-up"></i> Data Masuk</small>
+                    </div>
+                    <div class="icon-box bg-primary bg-opacity-10 text-primary">
+                        <i class="fas fa-database"></i>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card shadow-sm h-100 card-hover">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <span class="text-muted stat-label">Positif</span>
+                        <h3 class="fw-bold mt-2 mb-0 text-success">{{ positif }}</h3>
+                        <small class="text-muted">Respon Bagus</small>
+                    </div>
+                    <div class="icon-box bg-success bg-opacity-10 text-success">
+                        <i class="fas fa-smile"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card shadow-sm h-100 card-hover">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <span class="text-muted stat-label">Negatif</span>
+                        <h3 class="fw-bold mt-2 mb-0 text-danger">{{ negatif }}</h3>
+                        <small class="text-muted">Komplain</small>
+                    </div>
+                    <div class="icon-box bg-danger bg-opacity-10 text-danger">
+                        <i class="fas fa-frown"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card shadow-sm h-100 card-hover">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <span class="text-muted stat-label">Netral</span>
+                        <h3 class="fw-bold mt-2 mb-0 text-secondary">{{ netral }}</h3>
+                        <small class="text-muted">Informatif</small>
+                    </div>
+                    <div class="icon-box bg-secondary bg-opacity-10 text-secondary">
+                        <i class="fas fa-meh"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white py-3 border-0">
+                <h5 class="mb-0 fw-bold"><i class="fas fa-chart-pie me-2 text-primary"></i>Distribusi Sentimen</h5>
+            </div>
+            <div class="card-body d-flex justify-content-center align-items-center" style="position: relative; height: 350px;">
+                <canvas id="sentimentChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white py-3 border-0">
+                <h5 class="mb-0 fw-bold"><i class="fas fa-tasks me-2 text-primary"></i>Status Pelabelan</h5>
+            </div>
+            <div class="card-body">
+                
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="fw-medium text-dark">Sudah Dilabeli</span>
+                        <span class="text-primary fw-bold">{{ positif + negatif + netral }}</span>
+                    </div>
+                    <div class="progress" style="height: 10px;">
+                        {% set total_labeled = positif + negatif + netral %}
+                        {% set total_all = total if total > 0 else 1 %}
+                        {% set percent_labeled = (total_labeled / total_all) * 100 %}
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: {{ percent_labeled }}%"></div>
+                    </div>
+                    <small class="text-muted">Siap untuk training model</small>
+                </div>
+
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="fw-medium text-dark">Belum Diproses</span>
+                        <span class="text-warning fw-bold">{{ belum }}</span>
+                    </div>
+                    <div class="progress" style="height: 10px;">
+                        {% set percent_belum = (belum / total_all) * 100 %}
+                        <div class="progress-bar bg-warning" role="progressbar" style="width: {{ percent_belum }}%"></div>
+                    </div>
+                    <small class="text-muted">Perlu tindakan manual</small>
+                </div>
+
+                <div class="alert alert-light border mt-4">
+                    <div class="d-flex">
+                        <div class="me-3">
+                            <i class="fas fa-info-circle fa-2x text-info"></i>
+                        </div>
+                        <div>
+                            <p class="small mb-2 text-muted">Pastikan semua data mentah telah dilabeli sebelum memulai proses training ulang model.</p>
+                            <a href="{{ url_for('admin.data_ulasan') }}" class="btn btn-sm btn-primary w-100 rounded-pill shadow-sm">
+                                Kelola Data <i class="fas fa-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Data dari Flask
+        const dataPositif = {{ positif }};
+        const dataNegatif = {{ negatif }};
+        const dataNetral = {{ netral }};
+
+        const ctx = document.getElementById('sentimentChart').getContext('2d');
+        
+        // Font Configuration
+        Chart.defaults.font.family = "'Poppins', sans-serif";
+        Chart.defaults.color = '#666';
+
+        const sentimentChart = new Chart(ctx, {
+            type: 'doughnut', // Mengubah Pie menjadi Doughnut agar lebih modern
+            data: {
+                labels: ['Positif', 'Negatif', 'Netral'],
+                datasets: [{
+                    data: [dataPositif, dataNegatif, dataNetral],
+                    backgroundColor: [
+                        '#198754', // Success Green
+                        '#dc3545', // Danger Red
+                        '#6c757d'  // Secondary Gray
+                    ],
+                    borderWidth: 0,
+                    hoverOffset: 15 // Efek saat kursor diarahkan ke chart
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%', // Membuat lubang tengah lebih besar
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true, // Ikon bulat di legend
+                            pointStyle: 'circle'
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        titleColor: '#000',
+                        bodyColor: '#000',
+                        borderColor: '#ddd',
+                        borderWidth: 1,
+                        padding: 10,
+                        displayColors: true,
+                        boxPadding: 5
+                    }
+                }
+            }
+        });
+    });
+</script>
+
 {% endblock %}

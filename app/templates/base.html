@@ -1,231 +1,517 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Analisis Sentimen</title>
-    
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Sistem Analisis Sentimen{% endblock %}</title>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
 
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f3f4f6;
-            overflow-x: hidden;
-        }
+      :root {
+        --sidebar-width: 260px;
+        --primary-color: #4f46e5;
+        --primary-hover: #4338ca;
+        --sidebar-bg: #1e293b;
+        --sidebar-hover: #334155;
+        --text-secondary: #64748b;
+      }
 
-        /* --- Sidebar Styling --- */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f8fafc;
+        overflow-x: hidden;
+      }
+
+      /* Sidebar Styling */
+      .sidebar {
+        background: var(--sidebar-bg);
+        min-height: 100vh;
+        width: var(--sidebar-width);
+        position: fixed;
+        top: 0;
+        left: 0;
+        color: #fff;
+        transition: transform 0.3s ease;
+        z-index: 1045;
+        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .sidebar-brand {
+        padding: 1.75rem 1.5rem;
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #fff;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        gap: 10px;
+      }
+
+      .sidebar-brand i {
+        font-size: 1.6rem;
+        color: var(--primary-color);
+      }
+
+      .sidebar-brand .brand-text {
+        color: #fff;
+      }
+
+      .sidebar-brand .brand-accent {
+        background: linear-gradient(135deg, var(--primary-color), #06b6d4);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .sidebar-nav {
+        padding: 1.5rem 1rem;
+      }
+
+      .nav-section-title {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: rgba(255, 255, 255, 0.5);
+        padding: 1rem 1rem 0.5rem;
+        margin-top: 1rem;
+      }
+
+      .nav-link {
+        color: rgba(255, 255, 255, 0.8);
+        padding: 0.75rem 1rem;
+        margin: 0.25rem 0;
+        border-radius: 10px;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 500;
+        font-size: 0.95rem;
+      }
+
+      .nav-link:hover {
+        color: #fff;
+        background-color: var(--sidebar-hover);
+        transform: translateX(4px);
+      }
+
+      .nav-link.active {
+        background: linear-gradient(135deg, var(--primary-color), #06b6d4);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+      }
+
+      .nav-link i {
+        width: 20px;
+        font-size: 1.1rem;
+        text-align: center;
+      }
+
+      /* Main Content */
+      .main-content {
+        margin-left: var(--sidebar-width);
+        width: calc(100% - var(--sidebar-width));
+        min-height: 100vh;
+        padding: 0;
+        transition: margin-left 0.3s ease;
+      }
+
+      /* Top Navbar */
+      .top-navbar {
+        background: #fff;
+        padding: 1rem 2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+      }
+
+      .navbar-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin: 0;
+      }
+
+      .user-dropdown {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+        transition: background 0.2s;
+      }
+
+      .user-dropdown:hover {
+        background: #f1f5f9;
+      }
+
+      .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-color), #06b6d4);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 1rem;
+      }
+
+      .user-info {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .user-name {
+        font-weight: 600;
+        color: #1e293b;
+        font-size: 0.95rem;
+      }
+
+      .user-role {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+      }
+
+      /* Dropdown Menu */
+      .dropdown-menu {
+        border: none;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+        padding: 0.5rem;
+        min-width: 220px;
+      }
+
+      .dropdown-item {
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .dropdown-item:hover {
+        background: #f1f5f9;
+      }
+
+      .dropdown-item i {
+        width: 18px;
+        font-size: 1rem;
+      }
+
+      /* Content Container */
+      .content-container {
+        padding: 2rem;
+      }
+
+      /* Alert Messages */
+      .alert {
+        border: none;
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      }
+
+      .alert i {
+        font-size: 1.2rem;
+      }
+
+      /* Mobile Toggle Button */
+      .mobile-toggle {
+        display: none;
+        background: #f1f5f9;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .mobile-toggle:hover {
+        background: #e2e8f0;
+      }
+
+      /* Overlay */
+      .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1040;
+        display: none;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .sidebar-overlay.show {
+        display: block;
+        opacity: 1;
+      }
+
+      /* Responsive Design */
+      @media (max-width: 991.98px) {
         .sidebar {
-            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
-            min-height: 100vh;
-            color: #fff;
-            transition: all 0.3s;
-        }
-        
-        .sidebar-brand {
-            padding: 1.5rem 1rem;
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: #fff;
-            text-decoration: none;
-            display: block;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+          transform: translateX(-100%);
         }
 
-        .nav-link {
-            color: rgba(255,255,255,0.7);
-            padding: 12px 20px;
-            margin: 5px 10px;
-            border-radius: 8px;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
+        .sidebar.show {
+          transform: translateX(0);
         }
 
-        .nav-link:hover {
-            color: #fff;
-            background-color: rgba(255,255,255,0.1);
-            transform: translateX(5px);
-        }
-
-        /* Logika Active State (Highlight menu yang sedang aktif) */
-        .nav-link.active {
-            background-color: #3498db; /* Warna Biru Terang */
-            color: #fff;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .nav-link i {
-            width: 25px; /* Lebar tetap untuk ikon agar teks rata */
-            font-size: 1.1rem;
-        }
-
-        /* --- Main Content Styling --- */
         .main-content {
-            width: 100%;
-            padding: 20px;
-            min-height: 100vh;
+          margin-left: 0;
+          width: 100%;
         }
 
-        /* Navbar Atas (Mobile & Desktop) */
+        .mobile-toggle {
+          display: block;
+        }
+
+        .navbar-title {
+          font-size: 1.2rem;
+        }
+
+        .user-info {
+          display: none;
+        }
+
+        .content-container {
+          padding: 1.5rem 1rem;
+        }
+      }
+
+      @media (max-width: 576px) {
         .top-navbar {
-            background-color: #fff;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            padding: 10px 20px;
-            border-radius: 0 0 15px 15px; /* Sudut tumpul di bawah */
+          padding: 1rem;
         }
 
-        /* Responsiveness: Sidebar Offcanvas untuk Mobile */
-        @media (max-width: 991.98px) {
-            .sidebar {
-                position: fixed;
-                top: 0;
-                left: 0;
-                height: 100%;
-                z-index: 1045;
-                width: 280px;
-                transform: translateX(-100%); /* Sembunyi default di mobile */
-            }
-            .sidebar.show {
-                transform: translateX(0);
-            }
-            .sidebar-overlay {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0,0,0,0.5);
-                z-index: 1040;
-                display: none;
-            }
-            .sidebar-overlay.show {
-                display: block;
-            }
+        .navbar-title {
+          display: none;
         }
-
-        @media (min-width: 992px) {
-            .sidebar {
-                transform: none !important; /* Selalu tampil di desktop */
-                width: 260px;
-                position: fixed;
-            }
-            .main-content {
-                margin-left: 260px; /* Geser konten ke kanan */
-                width: calc(100% - 260px);
-            }
-            .mobile-toggle {
-                display: none; /* Sembunyikan tombol burger di desktop */
-            }
-        }
+      }
     </style>
-</head>
-<body>
-
-    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+  </head>
+  <body>
+    <div
+      class="sidebar-overlay"
+      id="sidebarOverlay"
+      onclick="toggleSidebar()"
+    ></div>
 
     <nav class="sidebar" id="sidebarMenu">
-        <a href="#" class="sidebar-brand text-center">
-            <i class="fas fa-chart-line me-2"></i> Sentimen<span class="text-info">Analisis</span>
-        </a>
-        
-        <ul class="nav flex-column mt-3">
-            <li class="nav-item">
-                <a href="{{ url_for('admin.dashboard') }}" 
-                   class="nav-link {% if request.endpoint == 'admin.dashboard' %}active{% endif %}">
-                    <i class="fas fa-home"></i> Dashboard
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ url_for('admin.data_ulasan') }}" 
-                   class="nav-link {% if request.endpoint == 'admin.data_ulasan' %}active{% endif %}">
-                    <i class="fas fa-database"></i> Data Ulasan
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ url_for('admin.training_model') }}" class="nav-link {% if request.endpoint == 'admin.training_model' %}active{% endif %}">
-                    <i class="fas fa-robot"></i> Training Model
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ url_for('admin.simulasi') }}" class="nav-link {% if request.endpoint == 'admin.simulasi' %}active{% endif %}">
-                    <i class="fas fa-vial"></i> Simulasi / Testing
-                </a>
-            </li>
-            
-            <li class="nav-item mt-4">
-                <span class="text-uppercase small text-white-50 px-4">Pengaturan</span>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link">
-                    <i class="fas fa-cog"></i> Konfigurasi
-                </a>
-            </li>
+      <a href="{{ url_for('admin.dashboard') }}" class="sidebar-brand">
+        <i class="fas fa-chart-line"></i>
+        <span class="brand-text"
+          >Sentimen<span class="brand-accent">Analisis</span></span
+        >
+      </a>
+
+      <div class="sidebar-nav">
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a
+              href="{{ url_for('admin.dashboard') }}"
+              class="nav-link {% if request.endpoint == 'admin.dashboard' %}active{% endif %}"
+            >
+              <i class="fas fa-home"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{{ url_for('admin.data_ulasan') }}"
+              class="nav-link {% if request.endpoint == 'admin.data_ulasan' %}active{% endif %}"
+            >
+              <i class="fas fa-database"></i>
+              <span>Data Ulasan</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{{ url_for('admin.training_model') }}"
+              class="nav-link {% if request.endpoint == 'admin.training_model' %}active{% endif %}"
+            >
+              <i class="fas fa-robot"></i>
+              <span>Training Model</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{{ url_for('admin.simulasi') }}"
+              class="nav-link {% if request.endpoint == 'admin.simulasi' %}active{% endif %}"
+            >
+              <i class="fas fa-vial"></i>
+              <span>Simulasi / Testing</span>
+            </a>
+          </li>
         </ul>
+
+        <div class="nav-section-title">Pengaturan</div>
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="fas fa-cog"></i>
+              <span>Konfigurasi</span>
+            </a>
+          </li>
+        </ul>
+
+        {% if current_user.role == 'super_admin' %}
+        <div class="nav-section-title">Super Admin</div>
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a href="{{ url_for('user_mgmt.index') }}" class="nav-link">
+              <i class="fas fa-users"></i>
+              <span>Kelola User</span>
+            </a>
+          </li>
+        </ul>
+        {% endif %}
+      </div>
     </nav>
 
     <div class="main-content">
-        
-        <nav class="navbar top-navbar mb-4 d-flex justify-content-between align-items-center">
-            <div class="d-flex align-items-center">
-                <button class="btn btn-light border mobile-toggle me-3" onclick="toggleSidebar()">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <h5 class="m-0 text-secondary d-none d-sm-block">
-                    {% block title %}Dashboard Overview{% endblock %}
-                </h5>
-            </div>
-
-            <div class="dropdown">
-                <a href="#" class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 35px; height: 35px;">
-                        {{ current_user.username[0] | upper }}
-                    </div>
-                    <span class="fw-medium d-none d-sm-inline">{{ current_user.username }}</span>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="dropdownUser1">
-                    <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2 text-muted"></i> Profil Saya</a></li>
-                    <li><a class="dropdown-item" href="#"><i class="fas fa-key me-2 text-muted"></i> Ganti Password</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
-                </ul>
-            </div>
-        </nav>
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm border-0" role="alert">
-                        {% if category == 'success' %}<i class="fas fa-check-circle me-2"></i>{% endif %}
-                        {% if category == 'danger' %}<i class="fas fa-exclamation-circle me-2"></i>{% endif %}
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-
-        <div class="container-fluid p-0">
-            {% block content %}
-            <div class="card border-0 shadow-sm p-5 text-center">
-                <h3 class="text-muted">Selamat Datang di Dashboard</h3>
-            </div>
-            {% endblock %}
+      <nav class="top-navbar">
+        <div class="d-flex align-items-center gap-3">
+          <button class="mobile-toggle" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h1 class="navbar-title">
+            {% block page_title %}Dashboard{% endblock %}
+          </h1>
         </div>
 
+        <div class="dropdown">
+          <a
+            href="#"
+            class="user-dropdown text-decoration-none"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            <div class="user-avatar">
+              {{ current_user.username[0] | upper }}
+            </div>
+            <div class="user-info">
+              <span class="user-name">{{ current_user.username }}</span>
+              <span class="user-role">{{ current_user.role | title }}</span>
+            </div>
+            <i class="fas fa-chevron-down text-secondary"></i>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li>
+              <a class="dropdown-item" href="#"
+                ><i class="fas fa-user text-primary"></i> Profil Saya</a
+              >
+            </li>
+            <li>
+              <a class="dropdown-item" href="#"
+                ><i class="fas fa-key text-warning"></i> Ganti Password</a
+              >
+            </li>
+            <li><hr class="dropdown-divider" /></li>
+            <li>
+              <a
+                class="dropdown-item text-danger"
+                href="{{ url_for('auth.logout') }}"
+                ><i class="fas fa-sign-out-alt"></i> Logout</a
+              >
+            </li>
+          </ul>
+        </div>
+      </nav>
+
+      <div class="content-container">
+        {% with messages = get_flashed_messages(with_categories=true) %} {% if
+        messages %} {% for category, message in messages %}
+        <div
+          class="alert alert-{{ category }} alert-dismissible fade show"
+          role="alert"
+        >
+          {% if category == 'success' %}<i class="fas fa-check-circle"></i>{%
+          endif %} {% if category == 'danger' %}<i
+            class="fas fa-exclamation-circle"
+          ></i
+          >{% endif %} {% if category == 'warning' %}<i
+            class="fas fa-exclamation-triangle"
+          ></i
+          >{% endif %} {% if category == 'info' %}<i
+            class="fas fa-info-circle"
+          ></i
+          >{% endif %}
+          <span>{{ message }}</span>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+          ></button>
+        </div>
+        {% endfor %} {% endif %} {% endwith %} {% block content %} {% endblock
+        %}
+      </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebarMenu');
-            const overlay = document.getElementById('sidebarOverlay');
-            sidebar.classList.toggle('show');
-            overlay.classList.toggle('show');
+      function toggleSidebar() {
+        const sidebar = document.getElementById("sidebarMenu");
+        const overlay = document.getElementById("sidebarOverlay");
+        sidebar.classList.toggle("show");
+        overlay.classList.toggle("show");
+      }
+
+      // Close sidebar when clicking outside on mobile
+      document.addEventListener("click", function (event) {
+        const sidebar = document.getElementById("sidebarMenu");
+        const overlay = document.getElementById("sidebarOverlay");
+        const toggle = document.querySelector(".mobile-toggle");
+
+        if (
+          window.innerWidth <= 991.98 &&
+          sidebar.classList.contains("show") &&
+          !sidebar.contains(event.target) &&
+          !toggle.contains(event.target)
+        ) {
+          sidebar.classList.remove("show");
+          overlay.classList.remove("show");
         }
+      });
     </script>
-</body>
+
+    {% block extra_js %}{% endblock %}
+  </body>
 </html>

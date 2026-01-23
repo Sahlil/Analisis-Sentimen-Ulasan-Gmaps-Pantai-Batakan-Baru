@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Edit User</h2>
+<div class="card shadow col-md-6">
+    <div class="card-body">
+        <form method="POST">
+            <div class="mb-3">
+                <label>Username</label>
+                <input type="text" name="username" class="form-control" value="{{ user.username }}" required>
+            </div>
+            <div class="mb-3">
+                <label>Password Baru <small class="text-muted">(Kosongkan jika tidak ingin ganti)</small></label>
+                <input type="password" name="password" class="form-control">
+            </div>
+            <div class="mb-3">
+                <label>Role</label>
+                <select name="role" class="form-select">
+                    <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+                    <option value="pimpinan" {% if user.role == 'pimpinan' %}selected{% endif %}>Pimpinan</option>
+                    <option value="super_admin" {% if user.role == 'super_admin' %}selected{% endif %}>Super Admin</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Update</button>
+            <a href="{{ url_for('user_mgmt.index') }}" class="btn btn-secondary">Batal</a>
+        </form>
+    </div>
+</div>
+{% endblock %}
