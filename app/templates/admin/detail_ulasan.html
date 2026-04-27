@@ -1,0 +1,98 @@
+{% extends "base.html" %} {% block page_title %}Detail Ulasan{% endblock %} {%
+block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">Detail Ulasan</h1>
+  <a
+    href="{{ url_for('admin.data_ulasan') }}"
+    class="btn btn-outline-secondary"
+  >
+    Kembali
+  </a>
+</div>
+
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <h5 class="card-title mb-3">Ulasan Asli</h5>
+    <p class="mb-0">{{ ulasan.teks_asli }}</p>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-12">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h6 class="card-title">1. Lowercase</h6>
+        <p class="mb-0">{{ steps.lowercased }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h6 class="card-title">2. Hapus Karakter Non-Huruf</h6>
+        <p class="mb-0">{{ steps.filtered }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h6 class="card-title">3. Normalisasi Spasi</h6>
+        <p class="mb-0">{{ steps.collapsed_spaces }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h6 class="card-title">4. Tokenisasi</h6>
+        <p class="mb-0">{{ steps.tokens | join(', ') }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h6 class="card-title">5. Normalisasi Kata</h6>
+        <p class="mb-0">{{ steps.normalized_tokens | join(', ') }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h6 class="card-title">6. Penanganan Negasi</h6>
+        <p class="mb-0">{{ steps.negation_tokens | join(', ') }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h6 class="card-title">7. Stemming</h6>
+        <p class="mb-0">{{ steps.stemmed_tokens | join(', ') }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h6 class="card-title">8. Stopword Removal</h6>
+        <p class="mb-2">{{ steps.final_tokens | join(', ') }}</p>
+        <div class="mt-2">
+          <strong>Label Sentimen:</strong>
+          {% if final_label %} {{ final_label | title }} {% else %} - {% endif
+          %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

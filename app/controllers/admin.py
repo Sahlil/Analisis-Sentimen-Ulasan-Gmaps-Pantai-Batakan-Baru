@@ -3,7 +3,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from app import db
 from app.models import Ulasan, RiwayatTraining
-from app.lib.preprocessing import preprocess_text, label_sentiment
+from app.lib.preprocessing import preprocess_text, label_sentiment, preprocess_debug_steps
 from app.lib.machine_learning import train_naive_bayes, predict_single
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
@@ -100,6 +100,19 @@ def dashboard():
 def data_ulasan():
     ulasan_list = Ulasan.query.all()
     return render_template('admin/data_ulasan.html', ulasan_list=ulasan_list)
+
+@admin_bp.route('/data_ulasan/<int:id>')
+@login_required
+def detail_ulasan(id):
+    ulasan = Ulasan.query.get_or_404(id)
+    steps = preprocess_debug_steps(ulasan.teks_asli)
+    final_label = label_sentiment(steps['final_tokens']) if steps['final_tokens'] else None
+    return render_template(
+        'admin/detail_ulasan.html',
+        ulasan=ulasan,
+        steps=steps,
+        final_label=final_label
+    )
 
 @admin_bp.route('/data_split')
 @login_required
