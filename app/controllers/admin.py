@@ -2,11 +2,81 @@ import pandas as pd
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from app import db
-from app.models import Ulasan
+from app.models import Ulasan, RiwayatTraining
 from app.lib.preprocessing import preprocess_text, label_sentiment
 from app.lib.machine_learning import train_naive_bayes, predict_single
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
+
+def build_hasil_from_riwayat(riwayat):
+    labels = ['Negatif', 'Netral', 'Positif']
+    cm = [
+        [riwayat.neg_neg, riwayat.neg_neu, riwayat.neg_pos],
+        [riwayat.neu_neg, riwayat.neu_neu, riwayat.neu_pos],
+        [riwayat.pos_neg, riwayat.pos_neu, riwayat.pos_pos]
+    ]
+
+    total = sum(sum(row) for row in cm)
+    detail = {}
+    precisions = []
+    recalls = []
+    f1_scores = []
+    supports = []
+
+    for i, label in enumerate(labels):
+        tp = cm[i][i]
+        fp = sum(cm[r][i] for r in range(3)) - tp
+        fn = sum(cm[i]) - tp
+        support = sum(cm[i])
+
+        precision = tp / (tp + fp) if (tp + fp) > 0 else 0
+        recall = tp / (tp + fn) if (tp + fn) > 0 else 0
+        f1 = (2 * precision * recall / (precision + recall)) if (precision + recall) > 0 else 0
+
+        detail[label] = {
+            'precision': precision,
+            'recall': recall,
+            'f1-score': f1,
+            'support': support
+        }
+
+        precisions.append(precision)
+        recalls.append(recall)
+        f1_scores.append(f1)
+        supports.append(support)
+
+    if supports and total > 0:
+        weighted_precision = sum(p * s for p, s in zip(precisions, supports)) / total
+        weighted_recall = sum(r * s for r, s in zip(recalls, supports)) / total
+        weighted_f1 = sum(f * s for f, s in zip(f1_scores, supports)) / total
+    else:
+        weighted_precision = 0
+        weighted_recall = 0
+        weighted_f1 = 0
+
+    macro_precision = sum(precisions) / 3 if precisions else 0
+    macro_recall = sum(recalls) / 3 if recalls else 0
+    macro_f1 = sum(f1_scores) / 3 if f1_scores else 0
+
+    detail['macro avg'] = {
+        'precision': macro_precision,
+        'recall': macro_recall,
+        'f1-score': macro_f1,
+        'support': total
+    }
+    detail['weighted avg'] = {
+        'precision': weighted_precision,
+        'recall': weighted_recall,
+        'f1-score': weighted_f1,
+        'support': total
+    }
+
+    return {
+        'akurasi': riwayat.akurasi,
+        'detail': detail,
+        'confusion_matrix': cm,
+        'labels': labels
+    }
 
 @admin_bp.route('/dashboard')
 @login_required
@@ -30,6 +100,13 @@ def dashboard():
 def data_ulasan():
     ulasan_list = Ulasan.query.all()
     return render_template('admin/data_ulasan.html', ulasan_list=ulasan_list)
+
+@admin_bp.route('/data_split')
+@login_required
+def data_split():
+    data_latih = Ulasan.query.filter_by(tipe_data='latih').order_by(Ulasan.tanggal_input.desc()).all()
+    data_uji = Ulasan.query.filter_by(tipe_data='uji').order_by(Ulasan.tanggal_input.desc()).all()
+    return render_template('admin/data_split.html', data_latih=data_latih, data_uji=data_uji)
 
 
 @admin_bp.route('/import', methods=['POST'])
@@ -138,18 +215,58 @@ def proses_preprocessing():
 @admin_bp.route('/training_model')
 @login_required
 def training_model():
-    return render_template('admin/training_model.html')
+    riwayat_list = RiwayatTraining.query.order_by(RiwayatTraining.tanggal_training.desc()).all()
+    latest = riwayat_list[0] if riwayat_list else None
+    hasil = build_hasil_from_riwayat(latest) if latest else None
+    split_ratio = latest.rasio_split if latest else '80:20'
+    return render_template(
+        'admin/training_model.html',
+        hasil=hasil,
+        split_ratio=split_ratio,
+        riwayat_list=riwayat_list
+    )
+
+@admin_bp.route('/riwayat_training/<int:riwayat_id>')
+@login_required
+def riwayat_training_detail(riwayat_id):
+    riwayat = RiwayatTraining.query.get_or_404(riwayat_id)
+    riwayat_list = RiwayatTraining.query.order_by(RiwayatTraining.tanggal_training.desc()).all()
+    hasil = build_hasil_from_riwayat(riwayat)
+    return render_template(
+        'admin/training_model.html',
+        hasil=hasil,
+        split_ratio=riwayat.rasio_split,
+        riwayat_list=riwayat_list,
+        selected_riwayat=riwayat
+    )
 
 @admin_bp.route('/proses_training', methods=['POST'])
 @login_required
 def proses_training():
-    hasil = train_naive_bayes()
+    split_ratio = request.form.get('split_ratio', '80:20')
+    split_map = {
+        '90:10': (0.9, 0.1),
+        '85:15': (0.85, 0.15),
+        '80:20': (0.8, 0.2),
+        '75:25': (0.75, 0.25),
+        '70:30': (0.7, 0.3),
+        '65:35': (0.65, 0.35),
+        '60:40': (0.6, 0.4)
+    }
+
+    if split_ratio not in split_map:
+        flash('Pilihan split data tidak valid.', 'danger')
+        return redirect(url_for('admin.training_model'))
+
+    train_size, test_size = split_map[split_ratio]
+
+    hasil = train_naive_bayes(test_size=test_size, train_size=train_size, split_ratio=split_ratio)
 
     if hasil['status'] == 'error':
-        flash(hasil['msg'], 'danger')
+        flash(hasil.get('message', 'Terjadi kesalahan saat training.'), 'danger')
     else:
         flash(f"Model berhasil dilatih dengan akurasi {hasil['akurasi']}%", 'success')
-        return render_template('admin/training_model.html', hasil=hasil)
+        return redirect(url_for('admin.training_model'))
 
     return redirect(url_for('admin.training_model'))
 

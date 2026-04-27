@@ -1,77 +1,128 @@
-{% extends "base.html" %}
+{% extends "base.html" %} {% block content %}
+<div
+  class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"
+>
+  <h1 class="h2">Data Ulasan Mentah</h1>
 
-{% block content %}
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">Data Ulasan Mentah</h1>
-    
-    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalImport">
-        <i class="bi bi-file-earmark-excel"></i> Import Excel/CSV
-    </button>
+  <button
+    type="button"
+    class="btn btn-success"
+    data-bs-toggle="modal"
+    data-bs-target="#modalImport"
+  >
+    <i class="bi bi-file-earmark-excel"></i> Import Excel/CSV
+  </button>
 </div>
 
 <div class="card shadow mb-4">
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-bordered table-striped">
-            <a href="{{ url_for('admin.proses_preprocessing') }}" class="btn btn-primary">
-                <i class="bi bi-gear-fill"></i> Jalankan Preprocessing
-            </a>
-            <a href="{{ url_for('admin.tambah_manual') }}" class="btn btn-warning text-dark ms-2">
-                <i class="bi bi-pencil-square"></i> Input Manual
-            </a>
-                <thead class="table-dark">
-                    <tr>
-                        <th width="5%">No</th>
-                        <th>Teks Ulasan Asli</th>
-                        <th width="15%">Tanggal Input</th>
-                        <th width="10%">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in ulasan_list %}
-                    <tr>
-                        <td>{{ loop.index }}</td>
-                        <td>{{ item.teks_asli }}</td>
-                        <td>{{ item.tanggal_input.strftime('%d-%m-%Y') }}</td>
-                        <td>
-                            <a href="{{ url_for('admin.hapus_ulasan', id=item.id) }}" 
-                               class="btn btn-sm btn-danger"
-                               onclick="return confirm('Yakin hapus data ini?')">Hapus</a>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="4" class="text-center">Belum ada data ulasan. Silakan Import dulu.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped">
+        <a
+          href="{{ url_for('admin.proses_preprocessing') }}"
+          class="btn btn-primary"
+        >
+          <i class="bi bi-gear-fill"></i> Jalankan Preprocessing
+        </a>
+        <a
+          href="{{ url_for('admin.tambah_manual') }}"
+          class="btn btn-warning text-dark ms-2"
+        >
+          <i class="bi bi-pencil-square"></i> Input Manual
+        </a>
+        <a
+          href="{{ url_for('admin.data_split') }}"
+          class="btn btn-info text-dark ms-2"
+        >
+          <i class="bi bi-diagram-3"></i> Lihat Data Latih/Uji
+        </a>
+        <thead class="table-dark">
+          <tr>
+            <th width="5%">No</th>
+            <th>Teks Ulasan Asli</th>
+            <th width="15%">Tanggal Input</th>
+            <th width="10%">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in ulasan_list %}
+          <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ item.teks_asli }}</td>
+            <td>{{ item.tanggal_input.strftime('%d-%m-%Y') }}</td>
+            <td>
+              <form
+                action="{{ url_for('admin.hapus_ulasan', id=item.id) }}"
+                method="POST"
+                style="display: inline"
+              >
+                <button
+                  type="submit"
+                  class="btn btn-sm btn-danger"
+                  onclick="return confirm('Yakin hapus data ini?');"
+                >
+                  Hapus
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="4" class="text-center">
+              Belum ada data ulasan. Silakan Import dulu.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
+  </div>
 </div>
 
 <div class="modal fade" id="modalImport" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Import Data Excel</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form action="{{ url_for('admin.import_ulasan') }}" method="POST" enctype="multipart/form-data">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label>Pilih File (.xlsx / .csv)</label>
-                        <input type="file" name="file_excel" class="form-control" required accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
-                        <small class="text-muted">Pastikan ada kolom header bernama <strong>Ulasan</strong></small>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>  
-                    <button type="submit" class="btn btn-primary">Upload & Simpan</button>
-                </div>
-            </form>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Import Data Excel</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
+      <form
+        action="{{ url_for('admin.import_ulasan') }}"
+        method="POST"
+        enctype="multipart/form-data"
+      >
+        <div class="modal-body">
+          <div class="mb-3">
+            <label>Pilih File (.xlsx / .csv)</label>
+            <input
+              type="file"
+              name="file_excel"
+              class="form-control"
+              required
+              accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            />
+            <small class="text-muted"
+              >Pastikan ada kolom header bernama <strong>Ulasan</strong></small
+            >
+          </div>
         </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Batal
+          </button>
+          <button type="submit" class="btn btn-primary">Upload & Simpan</button>
+        </div>
+      </form>
     </div>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

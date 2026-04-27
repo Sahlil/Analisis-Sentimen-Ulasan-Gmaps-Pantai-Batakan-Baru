@@ -111,6 +111,7 @@ NORMALISASI = {
     "rb": "ribu",
     "nyediakan": "sedia",
     "gejebo": "gazebo",
+    "najiss": "najis",
 }
 
 LEXICON = {
@@ -137,10 +138,13 @@ LEXICON = {
     "jelek": -2, "kecewa": -3, "buruk": -2, "karokean": -2,
     "aneh": -2, "duplikat": -2, "double": -2, "tolong": -2,
     "perbaiki": -2, "benahi": -2,
+    "keruh": -2, "najis": -3,
+    "rusak": -2, 
+    "hambur": -2,
 
     # Negatif standar
     "kurang": -1, "sulit": -1, "panas": -1, "terganggu": -1,
-    "mahal": -3, "crowded": -1, "kok": -1, "tagih": -1, 
+    "mahal": -2, "crowded": -1, "kok": -1, "tagih": -1, 
     "bayar": -1, "bingung": -1, "sayang": -1,
 
     # Negasi negatif

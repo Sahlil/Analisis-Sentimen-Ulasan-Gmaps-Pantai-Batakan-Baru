@@ -1,50 +1,276 @@
-{% extends "base.html" %}
+{% extends "base.html" %} {% block content %}
+<div class="row mb-4">
+  <div class="col-md-6">
+    <div class="card shadow-sm border-0">
+      <div
+        class="card-header bg-gradient text-white"
+        style="background: linear-gradient(135deg, #4f46e5, #06b6d4)"
+      >
+        <h5 class="mb-0"><i class="fas fa-cog"></i> Konfigurasi Training</h5>
+      </div>
+      <div class="card-body">
+        <p class="text-muted">
+          Proses ini akan mengambil data ulasan yang sudah dilabeli, lalu
+          melatih algoritma Naïve Bayes.
+        </p>
+        {% set split_selected = split_ratio|default('80:20') %} {% set
+        split_parts = split_selected.split(':') %}
+        <ul class="list-unstyled">
+          <li class="mb-2">
+            <i class="fas fa-check-circle text-success"></i>
+            <strong>Algoritma:</strong> Complement Naïve Bayes
+          </li>
+          <li class="mb-2">
+            <i class="fas fa-check-circle text-success"></i>
+            <strong>Feature Extraction:</strong> TF-IDF (1-2 Ngrams)
+          </li>
+          <li class="mb-2">
+            <i class="fas fa-check-circle text-success"></i>
+            <strong>Split Data:</strong> {{ split_parts[0] }}% Training, {{
+            split_parts[1] }}% Testing
+          </li>
+          <li class="mb-2">
+            <i class="fas fa-check-circle text-success"></i>
+            <strong>Balancing:</strong> SMOTE
+          </li>
+        </ul>
 
-{% block content %}
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">Training Model Naïve Bayes</h1>
+        <form
+          action="{{ url_for('admin.proses_training') }}"
+          method="POST"
+          class="mt-4"
+        >
+          <div class="mb-3">
+            <label class="form-label fw-bold"
+              >Split Data (Training:Testing)</label
+            >
+            <select name="split_ratio" class="form-select" required>
+              <option value="90:10" {% if split_selected == '90:10' %}selected{% endif %}>90:10</option>
+              <option value="85:15" {% if split_selected == '85:15' %}selected{% endif %}>85:15</option>
+              <option value="80:20" {% if split_selected == '80:20' %}selected{% endif %}>80:20</option>
+              <option value="75:25" {% if split_selected == '75:25' %}selected{% endif %}>75:25</option>
+              <option value="70:30" {% if split_selected == '70:30' %}selected{% endif %}>70:30</option>
+              <option value="65:35" {% if split_selected == '65:35' %}selected{% endif %}>65:35</option>
+              <option value="60:40" {% if split_selected == '60:40' %}selected{% endif %}>60:40</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary w-100 py-2">
+            <i class="fas fa-robot"></i> Mulai Training Model
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  {% if hasil %}
+  <div class="col-md-6">
+    <div class="card shadow-sm border-0 border-success">
+      <div class="card-header bg-success text-white">
+        <h5 class="mb-0"><i class="fas fa-chart-line"></i> Hasil Akurasi</h5>
+      </div>
+      <div class="card-body text-center">
+        <h1 class="display-2 fw-bold text-success mb-3">
+          {{ hasil.akurasi }}%
+        </h1>
+        <p class="text-muted mb-3">Akurasi Model (Accuracy Score)</p>
+        <hr />
+        {% if hasil.jumlah_data_awal is defined and
+        hasil.jumlah_data_setelah_smote is defined %}
+        <div class="row text-start">
+          <div class="col-6">
+            <small class="text-muted">Data Awal:</small>
+            <p class="fw-bold mb-0">{{ hasil.jumlah_data_awal }}</p>
+          </div>
+          <div class="col-6">
+            <small class="text-muted">Setelah SMOTE:</small>
+            <p class="fw-bold mb-0">{{ hasil.jumlah_data_setelah_smote }}</p>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
 </div>
 
-<div class="row">
-    <div class="col-md-6">
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white">
-                Konfigurasi Training
-            </div>
-            <div class="card-body">
-                <p>Proses ini akan mengambil data ulasan yang sudah dilabeli, lalu melatih algoritma Naïve Bayes.</p>
-                <ul>
-                    <li>Algoritma: <strong>Multinomial Naïve Bayes</strong></li>
-                    <li>Feature Extraction: <strong>TF-IDF (1-2 Ngrams)</strong></li>
-                    <li>Split Data: <strong>80% Training, 20% Testing</strong></li>
-                </ul>
-                
-                <form action="{{ url_for('admin.proses_training') }}" method="POST">
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="bi bi-cpu-fill"></i> Mulai Training Model
-                    </button>
-                </form>
-            </div>
+{% if hasil %}
+<div class="row mb-4">
+  <div class="col-md-12">
+    <div class="card shadow-sm border-0">
+      <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">
+          <i class="fas fa-chart-bar"></i> Laporan Klasifikasi
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table
+            class="table table-hover table-bordered text-center align-middle"
+          >
+            <thead class="table-light">
+              <tr>
+                <th>Label</th>
+                <th>Precision</th>
+                <th>Recall</th>
+                <th>F1-Score</th>
+                <th>Support</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for label, metrics in hasil.detail.items() %} {% if label not
+              in ['accuracy', 'macro avg', 'weighted avg'] %}
+              <tr>
+                <td class="fw-bold text-start">
+                  {% if label|lower == 'positif' %}
+                  <span class="badge bg-success">{{ label|capitalize }}</span>
+                  {% elif label|lower == 'negatif' %}
+                  <span class="badge bg-danger">{{ label|capitalize }}</span>
+                  {% else %}
+                  <span class="badge bg-secondary">{{ label|capitalize }}</span>
+                  {% endif %}
+                </td>
+                <td>{{ "%.4f"|format(metrics.precision) }}</td>
+                <td>{{ "%.4f"|format(metrics.recall) }}</td>
+                <td>{{ "%.4f"|format(metrics['f1-score']) }}</td>
+                <td>{{ metrics.support }}</td>
+              </tr>
+              {% endif %} {% endfor %} {% if 'macro avg' in hasil.detail %}
+              <tr class="table-secondary">
+                <td class="fw-bold text-start">Macro Avg</td>
+                <td>
+                  {{ "%.4f"|format(hasil.detail['macro avg'].precision) }}
+                </td>
+                <td>{{ "%.4f"|format(hasil.detail['macro avg'].recall) }}</td>
+                <td>
+                  {{ "%.4f"|format(hasil.detail['macro avg']['f1-score']) }}
+                </td>
+                <td>{{ hasil.detail['macro avg'].support }}</td>
+              </tr>
+              {% endif %} {% if 'weighted avg' in hasil.detail %}
+              <tr class="table-info">
+                <td class="fw-bold text-start">Weighted Avg</td>
+                <td>
+                  {{ "%.4f"|format(hasil.detail['weighted avg'].precision) }}
+                </td>
+                <td>
+                  {{ "%.4f"|format(hasil.detail['weighted avg'].recall) }}
+                </td>
+                <td>
+                  {{ "%.4f"|format(hasil.detail['weighted avg']['f1-score']) }}
+                </td>
+                <td>{{ hasil.detail['weighted avg'].support }}</td>
+              </tr>
+              {% endif %}
+            </tbody>
+          </table>
         </div>
+      </div>
     </div>
-
-    {% if hasil %}
-    <div class="col-md-6">
-        <div class="card shadow border-success">
-            <div class="card-header bg-success text-white">
-                Hasil Evaluasi Model
-            </div>
-            <div class="card-body text-center">
-                <h3 class="display-4">{{ hasil.akurasi }}%</h3>
-                <p class="text-muted">Akurasi Pengujian</p>
-                <hr>
-                <p>Total Data Digunakan: <strong>{{ hasil.jumlah_data }}</strong></p>
-                <div class="alert alert-info">
-                    Model berhasil disimpan di folder <code>model_storage/sentiment_model.pkl</code>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
+  </div>
 </div>
+
+<div class="row mb-4">
+  <div class="col-md-12">
+    <div class="card shadow-sm border-0">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="fas fa-th"></i> Confusion Matrix</h5>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-bordered text-center align-middle">
+            <thead class="table-light">
+              <tr>
+                <th class="bg-light">Prediksi \ Aktual</th>
+                {% for label in hasil.labels %}
+                <th class="fw-bold">{{ label|capitalize }}</th>
+                {% endfor %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in hasil.confusion_matrix %}
+              <tr>
+                <th class="table-light fw-bold">
+                  {{ hasil.labels[loop.index0]|capitalize }}
+                </th>
+                {% for val in row %} {% set row_idx = loop.index0 %} {% set
+                col_idx = loop.index0 %}
+                <td
+                  class="{% if row_idx == col_idx %}bg-success text-white fw-bold{% endif %}"
+                >
+                  {{ val }}
+                </td>
+                {% endfor %}
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="alert alert-info mt-3 mb-0">
+          <small>
+            <i class="fas fa-info-circle"></i> <strong>Keterangan:</strong
+            ><br />
+            • <strong>Baris</strong> = Label Sebenarnya (Aktual)<br />
+            • <strong>Kolom</strong> = Label Prediksi Model<br />
+            • <strong>Kotak Hijau</strong> = Prediksi Benar (True
+            Positive/Negative)
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endif %}
+
+<div class="row mb-4">
+  <div class="col-md-12">
+    <div class="card shadow-sm border-0">
+      <div class="card-header bg-secondary text-white">
+        <h5 class="mb-0"><i class="fas fa-history"></i> Riwayat Training</h5>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table
+            class="table table-bordered table-striped text-center align-middle"
+          >
+            <thead class="table-light">
+              <tr>
+                <th>Tanggal Training</th>
+                <th>Jumlah Data</th>
+                <th>Rasio Data</th>
+                <th>Akurasi</th>
+                <th>Detail</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in riwayat_list %}
+              <tr>
+                <td>{{ item.tanggal_training.strftime('%d-%m-%Y %H:%M') }}</td>
+                <td>{{ item.jumlah_data }}</td>
+                <td>{{ item.rasio_split }}</td>
+                <td>{{ item.akurasi }}%</td>
+                <td>
+                  <a
+                    href="{{ url_for('admin.riwayat_training_detail', riwayat_id=item.id) }}"
+                    class="btn btn-sm btn-outline-primary"
+                  >
+                    Lihat Detail
+                  </a>
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="4" class="text-center">
+                  Belum ada riwayat training.
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock %}

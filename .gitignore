@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+.env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Model artifacts
+model_storage/
+
+# VS Code
+.vscode/
+
+# Test/coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Build/dist
+build/
+dist/
+*.egg-info/
