@@ -154,3 +154,19 @@ def predict_single(text_raw):
         return prediksi
     except FileNotFoundError:
         return "Model belum dilatih. Silakan latih model terlebih dahulu."
+
+def predict_single_clean(text_clean):
+    try:
+        with open(MODEL_PATH, 'rb') as f:
+            vectorizer, clf = pickle.load(f)
+
+        vec = vectorizer.transform([text_clean])
+
+        if vec.nnz == 0:
+            return "Netral"
+
+        prediksi = clf.predict(vec)[0]
+
+        return prediksi
+    except FileNotFoundError:
+        return "Model belum dilatih. Silakan latih model terlebih dahulu."

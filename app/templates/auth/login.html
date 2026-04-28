@@ -1,151 +1,264 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login - Sistem Analisis Sentimen</title>
-    
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
 
     <style>
-        body {
-            /* Gradient background yang modern untuk tema teknologi/analisis */
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            font-family: 'Poppins', sans-serif;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+      body {
+        background: radial-gradient(
+          circle at 20% 10%,
+          #fff7c2 0%,
+          #ffe9a8 25%,
+          #dff9ff 55%,
+          #bce3ff 100%
+        );
+        font-family: "Poppins", sans-serif;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+      .wave-layer {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 180px;
+        background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1440' height='180' viewBox='0 0 1440 180'><path fill='%23bfe9ff' fill-opacity='0.9' d='M0,96L48,90.7C96,85,192,75,288,80C384,85,480,107,576,122.7C672,139,768,149,864,138.7C960,128,1056,96,1152,85.3C1248,75,1344,85,1392,90.7L1440,96L1440,180L1392,180C1344,180,1248,180,1152,180C1056,180,960,180,864,180C768,180,672,180,576,180C480,180,384,180,288,180C192,180,96,180,48,180L0,180Z'/></svg>")
+          no-repeat bottom;
+        background-size: cover;
+        opacity: 0.9;
+        animation: swell 10s ease-in-out infinite;
+        pointer-events: none;
+      }
+      .wave-layer.alt {
+        bottom: 20px;
+        height: 140px;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1440' height='140' viewBox='0 0 1440 140'><path fill='%239ed3ff' fill-opacity='0.6' d='M0,80L60,74.7C120,69,240,59,360,74.7C480,91,600,133,720,133.3C840,133,960,91,1080,80C1200,69,1320,91,1380,101.3L1440,112L1440,140L1380,140C1320,140,1200,140,1080,140C960,140,840,140,720,140C600,140,480,140,360,140C240,140,120,140,60,140L0,140Z'/></svg>");
+        animation-duration: 14s;
+      }
+      .login-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+        width: 100%;
+        max-width: 420px;
+        animation: fadeIn 0.8s ease-in-out;
+        position: relative;
+        z-index: 2;
+      }
+      .card-header-custom {
+        background-color: #fff;
+        padding-top: 40px;
+        padding-bottom: 10px;
+        text-align: center;
+      }
+      .logo-icon {
+        font-size: 3rem;
+        background: -webkit-linear-gradient(#0ea5a4, #2563eb);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 15px;
+      }
+      .btn-primary-custom {
+        background: linear-gradient(to right, #0ea5a4, #2563eb);
+        border: none;
+        padding: 12px;
+        font-weight: 500;
+        border-radius: 10px;
+        transition: transform 0.2s;
+      }
+      .btn-primary-custom:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+      }
+      .form-floating > label {
+        padding-left: 20px;
+      }
+      .form-control {
+        border-radius: 10px;
+        padding-left: 20px;
+      }
+      .toggle-password {
+        cursor: pointer;
+        z-index: 10;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
         }
-        .login-card {
-            border: none;
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-            overflow: hidden;
-            width: 100%;
-            max-width: 420px;
-            animation: fadeIn 0.8s ease-in-out;
+        to {
+          opacity: 1;
+          transform: translateY(0);
         }
-        .card-header-custom {
-            background-color: #fff;
-            padding-top: 40px;
-            padding-bottom: 10px;
-            text-align: center;
+      }
+      @keyframes swell {
+        0%,
+        100% {
+          transform: translateY(0);
         }
-        .logo-icon {
-            font-size: 3rem;
-            background: -webkit-linear-gradient(#667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 15px;
+        50% {
+          transform: translateY(8px);
         }
-        .btn-primary-custom {
-            background: linear-gradient(to right, #667eea, #764ba2);
-            border: none;
-            padding: 12px;
-            font-weight: 500;
-            border-radius: 10px;
-            transition: transform 0.2s;
-        }
-        .btn-primary-custom:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
-        }
-        .form-floating > label {
-            padding-left: 20px;
-        }
-        .form-control {
-            border-radius: 10px;
-            padding-left: 20px;
-        }
-        .toggle-password {
-            cursor: pointer;
-            z-index: 10;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+      }
     </style>
-</head>
-<body>
-
+  </head>
+  <body>
     <div class="container px-4">
-        <div class="card login-card mx-auto">
-            
-            <div class="card-header-custom">
-                <i class="fas fa-brain logo-icon"></i> 
-                <h4 class="fw-bold text-dark">Selamat Datang</h4>
-                <p class="text-muted small">Silakan login ke Sistem Analisis Sentimen</p>
-            </div>
-
-            <div class="card-body p-4 pt-2">
-                
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        {% for category, message in messages %}
-                            <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
-                                <i class="fas fa-info-circle me-2"></i> {{ message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-                {% endwith %}
-
-                <form method="POST">
-                    <div class="form-floating mb-3">
-                        <input type="text" name="username" class="form-control" id="floatingInput" placeholder="Username" required>
-                        <label for="floatingInput"><i class="fas fa-user me-2 text-muted"></i>Username</label>
-                    </div>
-
-                    <div class="input-group mb-4">
-                        <div class="form-floating flex-grow-1">
-                            <input type="password" name="password" class="form-control" id="floatingPassword" placeholder="Password" style="border-top-right-radius: 0; border-bottom-right-radius: 0;" required>
-                            <label for="floatingPassword"><i class="fas fa-lock me-2 text-muted"></i>Password</label>
-                        </div>
-                        <span class="input-group-text bg-white border-start-0" style="border-top-right-radius: 10px; border-bottom-right-radius: 10px;">
-                            <i class="fas fa-eye text-muted toggle-password" id="togglePasswordBtn"></i>
-                        </span>
-                    </div>
-
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="rememberMe">
-                            <label class="form-check-label small text-muted" for="rememberMe">Ingat saya</label>
-                        </div>
-                        <a href="#" class="small text-decoration-none" style="color: #764ba2;">Lupa password?</a>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary-custom w-100 text-white">
-                        Masuk Sekarang <i class="fas fa-arrow-right ms-2"></i>
-                    </button>
-                </form>
-            </div>
-            
-            <div class="card-footer bg-white text-center py-3 border-0">
-                <small class="text-muted">Belum punya akun? <a href="#" class="fw-bold text-decoration-none" style="color: #667eea;">Daftar disini</a></small>
-            </div>
+      <div class="card login-card mx-auto">
+        <div class="card-header-custom">
+          <i class="fas fa-umbrella-beach logo-icon"></i>
+          <h4 class="fw-bold text-dark">Selamat Datang</h4>
+          <p class="text-muted small">
+            Masuk untuk analisis sentimen Pantai Batakan Baru
+          </p>
         </div>
+
+        <div class="card-body p-4 pt-2">
+          {% with messages = get_flashed_messages(with_categories=true) %} {% if
+          messages %} {% for category, message in messages %}
+          <div
+            class="alert alert-{{ category }} alert-dismissible fade show shadow-sm"
+            role="alert"
+          >
+            <i class="fas fa-info-circle me-2"></i> {{ message }}
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+              aria-label="Close"
+            ></button>
+          </div>
+          {% endfor %} {% endif %} {% endwith %}
+
+          <form method="POST">
+            <div class="form-floating mb-3">
+              <input
+                type="text"
+                name="username"
+                class="form-control"
+                id="floatingInput"
+                placeholder="Username"
+                required
+              />
+              <label for="floatingInput"
+                ><i class="fas fa-user me-2 text-muted"></i>Username</label
+              >
+            </div>
+
+            <div class="input-group mb-4">
+              <div class="form-floating flex-grow-1">
+                <input
+                  type="password"
+                  name="password"
+                  class="form-control"
+                  id="floatingPassword"
+                  placeholder="Password"
+                  style="
+                    border-top-right-radius: 0;
+                    border-bottom-right-radius: 0;
+                  "
+                  required
+                />
+                <label for="floatingPassword"
+                  ><i class="fas fa-lock me-2 text-muted"></i>Password</label
+                >
+              </div>
+              <span
+                class="input-group-text bg-white border-start-0"
+                style="
+                  border-top-right-radius: 10px;
+                  border-bottom-right-radius: 10px;
+                "
+              >
+                <i
+                  class="fas fa-eye text-muted toggle-password"
+                  id="togglePasswordBtn"
+                ></i>
+              </span>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="rememberMe"
+                />
+                <label
+                  class="form-check-label small text-muted"
+                  for="rememberMe"
+                  >Ingat saya</label
+                >
+              </div>
+              <a
+                href="#"
+                class="small text-decoration-none"
+                style="color: #2563eb"
+                >Lupa password?</a
+              >
+            </div>
+
+            <button
+              type="submit"
+              class="btn btn-primary-custom w-100 text-white"
+            >
+              Masuk Sekarang <i class="fas fa-arrow-right ms-2"></i>
+            </button>
+          </form>
+        </div>
+
+        <div class="card-footer bg-white text-center py-3 border-0">
+          <small class="text-muted"
+            >Belum punya akun?
+            <a
+              href="#"
+              class="fw-bold text-decoration-none"
+              style="color: #0ea5a4"
+              >Daftar disini</a
+            ></small
+          >
+        </div>
+      </div>
     </div>
 
+    <div class="wave-layer alt"></div>
+    <div class="wave-layer"></div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <script>
-        const togglePassword = document.querySelector('#togglePasswordBtn');
-        const password = document.querySelector('#floatingPassword');
+      const togglePassword = document.querySelector("#togglePasswordBtn");
+      const password = document.querySelector("#floatingPassword");
 
-        togglePassword.addEventListener('click', function (e) {
-            // Toggle tipe attribute
-            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-            password.setAttribute('type', type);
-            
-            // Toggle ikon mata
-            this.classList.toggle('fa-eye');
-            this.classList.toggle('fa-eye-slash');
-        });
+      togglePassword.addEventListener("click", function (e) {
+        // Toggle tipe attribute
+        const type =
+          password.getAttribute("type") === "password" ? "text" : "password";
+        password.setAttribute("type", type);
+
+        // Toggle ikon mata
+        this.classList.toggle("fa-eye");
+        this.classList.toggle("fa-eye-slash");
+      });
     </script>
-
-</body>
+  </body>
 </html>

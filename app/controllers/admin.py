@@ -4,7 +4,7 @@ from flask_login import login_required, current_user
 from app import db
 from app.models import Ulasan, RiwayatTraining
 from app.lib.preprocessing import preprocess_text, label_sentiment, preprocess_debug_steps
-from app.lib.machine_learning import train_naive_bayes, predict_single
+from app.lib.machine_learning import train_naive_bayes, predict_single, predict_single_clean
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -289,15 +289,17 @@ def proses_training():
 def simulasi():
     hasil_prediksi = None
     teks_input = ''
+    teks_clean = ''
 
     if request.method == 'POST':
-        teks_input = request.form.get('teks_input')
-
-        print(teks_input)
+        teks_input = request.form.get('teks_input', '')
 
         if teks_input:
-            hasil_prediksi = predict_single(teks_input)
-            print(hasil_prediksi)
+            tokens = preprocess_text(teks_input)
+            teks_clean = " ".join(tokens)
+
+        if teks_clean:
+            hasil_prediksi = predict_single_clean(teks_clean)
 
     return render_template('admin/simulasi.html',
                            hasil=hasil_prediksi,
