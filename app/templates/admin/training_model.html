@@ -74,7 +74,12 @@
         </h1>
         <p class="text-muted mb-3">Akurasi Model (Accuracy Score)</p>
         <hr />
-        {% if hasil.jumlah_data_awal is defined and
+        {% if total_data %}
+        <div class="mb-3">
+          <small class="text-muted">Total Data:</small>
+          <p class="fw-bold mb-0">{{ total_data }}</p>
+        </div>
+        {% endif %} {% if hasil.jumlah_data_awal is defined and
         hasil.jumlah_data_setelah_smote is defined %}
         <div class="row text-start">
           <div class="col-6">
@@ -214,6 +219,195 @@
             • <strong>Kotak Hijau</strong> = Prediksi Benar (True
             Positive/Negative)
           </small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mb-4">
+  <div class="col-md-12">
+    <div class="accordion" id="detailAccordion">
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="headingDetail">
+          <button
+            class="accordion-button collapsed"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#collapseDetail"
+            aria-expanded="false"
+            aria-controls="collapseDetail"
+          >
+            Bongkar Proses AI
+          </button>
+        </h2>
+        <div
+          id="collapseDetail"
+          class="accordion-collapse collapse"
+          aria-labelledby="headingDetail"
+          data-bs-parent="#detailAccordion"
+        >
+          <div class="accordion-body">
+            {% if model_details %}
+            <div class="mb-4">
+              <h5 class="fw-bold mb-3">
+                Bagian 1: Ekstraksi Fitur (TF-IDF) - Sampel TF-IDF Tertinggi
+              </h5>
+              <div class="table-responsive">
+                <table class="table table-bordered table-sm align-middle">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Term</th>
+                      <th>IDF</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for item in model_details.tfidf_top %}
+                    <tr>
+                      <td>{{ item.term }}</td>
+                      <td>{{ "%.4f"|format(item.idf) }}</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <h5 class="fw-bold mb-3">Bagian 2: Perhitungan Prior</h5>
+              <div class="table-responsive">
+                <table class="table table-bordered table-sm align-middle">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Kelas</th>
+                      <th>Log Prior</th>
+                      <th>Prior</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for item in model_details.priors %}
+                    <tr>
+                      <td>{{ item.label|capitalize }}</td>
+                      <td>{{ "%.6f"|format(item.log_prior) }}</td>
+                      <td>{{ "%.6f"|format(item.prior) }}</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <h5 class="fw-bold mb-3">Bagian 3: Bobot Fitur ComplementNB</h5>
+              <div class="row g-3">
+                {% for group in model_details.likelihoods %}
+                <div class="col-lg-4">
+                  <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-light fw-semibold">
+                      {{ group.label|capitalize }}
+                    </div>
+                    <div class="card-body">
+                      <table class="table table-sm mb-0">
+                        <thead>
+                          <tr>
+                            <th>Kata</th>
+                            <th>Bobot</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for word in group.words %}
+                          <tr>
+                            <td>{{ word.term }}</td>
+                            <td>{{ "%.6f"|format(word.weight) }}</td>
+                          </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div>
+              <h5 class="fw-bold mb-3">Bagian 4: Simulasi "Bongkar Mesin"</h5>
+              {% if model_details.simulation %}
+              <div class="alert alert-info">
+                <strong>Kalimat Uji:</strong> {{ model_details.simulation.text
+                }}
+              </div>
+              <p class="mb-2">
+                <strong>Token Bersih:</strong> {{
+                model_details.simulation.tokens|join(', ') }}
+              </p>
+              <div class="table-responsive">
+                <table class="table table-bordered table-sm align-middle">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Kelas</th>
+                      <th>Log Prior</th>
+                      <th>Bobot Fitur (Sum)</th>
+                      <th>Skor (Log Prior + Bobot)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for cls in model_details.simulation.class_scores %}
+                    <tr>
+                      <td>{{ cls.label|capitalize }}</td>
+                      <td>{{ "%.6f"|format(cls.log_prior) }}</td>
+                      <td>{{ "%.6f"|format(cls.weight_sum) }}</td>
+                      <td>{{ "%.6f"|format(cls.score) }}</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              <div class="row g-3">
+                {% for cls in model_details.simulation.class_scores %}
+                <div class="col-lg-4">
+                  <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-light fw-semibold">
+                      Kontribusi Token - {{ cls.label|capitalize }}
+                    </div>
+                    <div class="card-body">
+                      {% if cls.token_logs %}
+                      <table class="table table-sm mb-0">
+                        <thead>
+                          <tr>
+                            <th>Token</th>
+                            <th>Bobot</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for token in cls.token_logs %}
+                          <tr>
+                            <td>{{ token.token }}</td>
+                            <td>{{ "%.6f"|format(token.weight) }}</td>
+                          </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                      {% else %}
+                      <p class="text-muted mb-0">
+                        Tidak ada token yang cocok di vocab.
+                      </p>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+              {% else %}
+              <p class="text-muted mb-0">Belum ada data uji untuk simulasi.</p>
+              {% endif %}
+            </div>
+            {% else %}
+            <p class="text-muted mb-0">
+              Model belum tersedia. Silakan latih model terlebih dahulu.
+            </p>
+            {% endif %}
+          </div>
         </div>
       </div>
     </div>

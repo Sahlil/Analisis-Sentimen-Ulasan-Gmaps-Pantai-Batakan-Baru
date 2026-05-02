@@ -1,10 +1,14 @@
+import os
+import pickle
 import pandas as pd
+import numpy as np
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
+from sqlalchemy import func
 from app import db
 from app.models import Ulasan, RiwayatTraining
 from app.lib.preprocessing import preprocess_text, label_sentiment, preprocess_debug_steps
-from app.lib.machine_learning import train_naive_bayes, predict_single, predict_single_clean
+from app.lib.machine_learning import train_naive_bayes, predict_single, predict_single_clean, MODEL_PATH
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -76,6 +80,88 @@ def build_hasil_from_riwayat(riwayat):
         'detail': detail,
         'confusion_matrix': cm,
         'labels': labels
+    }
+
+def load_model_details(top_n=10, likelihood_top_n=5):
+    if not os.path.exists(MODEL_PATH):
+        return None
+
+    with open(MODEL_PATH, 'rb') as f:
+        vectorizer, clf = pickle.load(f)
+
+    feature_names = vectorizer.get_feature_names_out()
+    idf_values = vectorizer.idf_
+    top_tfidf_idx = np.argsort(idf_values)[::-1][:top_n]
+    tfidf_top = [
+        {'term': feature_names[i], 'idf': float(idf_values[i])}
+        for i in top_tfidf_idx
+    ]
+
+    priors = [
+        {
+            'label': label,
+            'log_prior': float(clf.class_log_prior_[idx]),
+            'prior': float(np.exp(clf.class_log_prior_[idx]))
+        }
+        for idx, label in enumerate(clf.classes_)
+    ]
+
+    likelihoods = []
+    for class_idx, label in enumerate(clf.classes_):
+        weights = clf.feature_log_prob_[class_idx]
+        top_idx = np.argsort(weights)[::-1][:likelihood_top_n]
+        words = [
+            {'term': feature_names[i], 'weight': float(weights[i])}
+            for i in top_idx
+        ]
+        likelihoods.append({'label': label, 'words': words})
+
+    simulation = None
+    sample = (
+        Ulasan.query.filter_by(tipe_data='uji')
+        .filter(Ulasan.teks_clean != None)
+        .order_by(func.rand())
+        .first()
+    )
+
+    if sample:
+        tokens = preprocess_text(sample.teks_asli)
+        vocab = vectorizer.vocabulary_
+        class_scores = []
+
+        for class_idx, label in enumerate(clf.classes_):
+            log_prior = float(clf.class_log_prior_[class_idx])
+            token_logs = []
+            weight_sum = 0.0
+
+            for token in tokens:
+                token_idx = vocab.get(token)
+                if token_idx is None:
+                    continue
+                weight = float(clf.feature_log_prob_[class_idx][token_idx])
+                weight_sum += weight
+                token_logs.append({'token': token, 'weight': weight})
+
+            score = log_prior + weight_sum
+            class_scores.append({
+                'label': label,
+                'log_prior': log_prior,
+                'weight_sum': weight_sum,
+                'score': score,
+                'token_logs': token_logs
+            })
+
+        simulation = {
+            'text': sample.teks_asli,
+            'tokens': tokens,
+            'class_scores': class_scores
+        }
+
+    return {
+        'tfidf_top': tfidf_top,
+        'priors': priors,
+        'likelihoods': likelihoods,
+        'simulation': simulation
     }
 
 @admin_bp.route('/dashboard')
@@ -232,11 +318,15 @@ def training_model():
     latest = riwayat_list[0] if riwayat_list else None
     hasil = build_hasil_from_riwayat(latest) if latest else None
     split_ratio = latest.rasio_split if latest else '80:20'
+    total_data = latest.jumlah_data if latest else None
+    model_details = load_model_details()
     return render_template(
         'admin/training_model.html',
         hasil=hasil,
         split_ratio=split_ratio,
-        riwayat_list=riwayat_list
+        riwayat_list=riwayat_list,
+        total_data=total_data,
+        model_details=model_details
     )
 
 @admin_bp.route('/riwayat_training/<int:riwayat_id>')
@@ -245,12 +335,15 @@ def riwayat_training_detail(riwayat_id):
     riwayat = RiwayatTraining.query.get_or_404(riwayat_id)
     riwayat_list = RiwayatTraining.query.order_by(RiwayatTraining.tanggal_training.desc()).all()
     hasil = build_hasil_from_riwayat(riwayat)
+    model_details = load_model_details()
     return render_template(
         'admin/training_model.html',
         hasil=hasil,
         split_ratio=riwayat.rasio_split,
         riwayat_list=riwayat_list,
-        selected_riwayat=riwayat
+        selected_riwayat=riwayat,
+        total_data=riwayat.jumlah_data,
+        model_details=model_details
     )
 
 @admin_bp.route('/proses_training', methods=['POST'])
