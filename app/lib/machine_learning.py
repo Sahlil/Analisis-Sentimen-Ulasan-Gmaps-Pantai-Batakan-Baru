@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
-from sklearn.naive_bayes import ComplementNB
+from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from app import db
 from app.models import Ulasan, RiwayatTraining
@@ -79,7 +79,7 @@ def train_naive_bayes(test_size=0.2, train_size=None, split_ratio=None):
     smote = SMOTE(random_state=42)
     x_train_res, y_train_res = smote.fit_resample(x_train, y_train)
 
-    clf =  ComplementNB()
+    clf = MultinomialNB()
     clf.fit(x_train_res, y_train_res)
 
     y_pred = clf.predict(x_test)

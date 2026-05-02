@@ -91,11 +91,28 @@ def load_model_details(top_n=10, likelihood_top_n=5):
 
     feature_names = vectorizer.get_feature_names_out()
     idf_values = vectorizer.idf_
-    top_tfidf_idx = np.argsort(idf_values)[::-1][:top_n]
-    tfidf_top = [
-        {'term': feature_names[i], 'idf': float(idf_values[i])}
-        for i in top_tfidf_idx
-    ]
+    texts = [row[0] for row in Ulasan.query.with_entities(Ulasan.teks_clean)
+             .filter(Ulasan.teks_clean != None).all()]
+
+    tfidf_top = []
+    if texts:
+        tfidf_matrix = vectorizer.transform(texts)
+        mean_tfidf = np.asarray(tfidf_matrix.mean(axis=0)).ravel()
+        top_tfidf_idx = np.argsort(mean_tfidf)[::-1][:top_n]
+        tfidf_top = [
+            {
+                'term': feature_names[i],
+                'idf': float(idf_values[i]),
+                'mean_tfidf': float(mean_tfidf[i])
+            }
+            for i in top_tfidf_idx
+        ]
+    else:
+        top_tfidf_idx = np.argsort(idf_values)[:top_n]
+        tfidf_top = [
+            {'term': feature_names[i], 'idf': float(idf_values[i]), 'mean_tfidf': 0.0}
+            for i in top_tfidf_idx
+        ]
 
     priors = [
         {
@@ -108,10 +125,14 @@ def load_model_details(top_n=10, likelihood_top_n=5):
 
     likelihoods = []
     for class_idx, label in enumerate(clf.classes_):
-        weights = clf.feature_log_prob_[class_idx]
-        top_idx = np.argsort(weights)[::-1][:likelihood_top_n]
+        log_probs = clf.feature_log_prob_[class_idx]
+        top_idx = np.argsort(log_probs)[::-1][:likelihood_top_n]
         words = [
-            {'term': feature_names[i], 'weight': float(weights[i])}
+            {
+                'term': feature_names[i],
+                'log_prob': float(log_probs[i]),
+                'prob': float(np.exp(log_probs[i]))
+            }
             for i in top_idx
         ]
         likelihoods.append({'label': label, 'words': words})
@@ -132,22 +153,22 @@ def load_model_details(top_n=10, likelihood_top_n=5):
         for class_idx, label in enumerate(clf.classes_):
             log_prior = float(clf.class_log_prior_[class_idx])
             token_logs = []
-            weight_sum = 0.0
+            log_likelihood_sum = 0.0
 
             for token in tokens:
                 token_idx = vocab.get(token)
                 if token_idx is None:
                     continue
-                weight = float(clf.feature_log_prob_[class_idx][token_idx])
-                weight_sum += weight
-                token_logs.append({'token': token, 'weight': weight})
+                log_prob = float(clf.feature_log_prob_[class_idx][token_idx])
+                log_likelihood_sum += log_prob
+                token_logs.append({'token': token, 'log_prob': log_prob})
 
-            score = log_prior + weight_sum
+            log_posterior = log_prior + log_likelihood_sum
             class_scores.append({
                 'label': label,
                 'log_prior': log_prior,
-                'weight_sum': weight_sum,
-                'score': score,
+                'log_likelihood_sum': log_likelihood_sum,
+                'log_posterior': log_posterior,
                 'token_logs': token_logs
             })
 
@@ -184,8 +205,12 @@ def dashboard():
 @admin_bp.route('/data_ulasan')
 @login_required
 def data_ulasan():
-    ulasan_list = Ulasan.query.all()
-    return render_template('admin/data_ulasan.html', ulasan_list=ulasan_list)
+    page = request.args.get('page', 1, type=int)
+    pagination = Ulasan.query.order_by(Ulasan.tanggal_input.desc()).paginate(
+        page=page, per_page=20, error_out=False
+    )
+    ulasan_list = pagination.items
+    return render_template('admin/data_ulasan.html', ulasan_list=ulasan_list, pagination=pagination)
 
 @admin_bp.route('/data_ulasan/<int:id>')
 @login_required
@@ -314,7 +339,11 @@ def proses_preprocessing():
 @admin_bp.route('/training_model')
 @login_required
 def training_model():
-    riwayat_list = RiwayatTraining.query.order_by(RiwayatTraining.tanggal_training.desc()).all()
+    page = request.args.get('page', 1, type=int)
+    pagination = RiwayatTraining.query.order_by(RiwayatTraining.tanggal_training.desc()).paginate(
+        page=page, per_page=10, error_out=False
+    )
+    riwayat_list = pagination.items
     latest = riwayat_list[0] if riwayat_list else None
     hasil = build_hasil_from_riwayat(latest) if latest else None
     split_ratio = latest.rasio_split if latest else '80:20'
@@ -326,14 +355,19 @@ def training_model():
         split_ratio=split_ratio,
         riwayat_list=riwayat_list,
         total_data=total_data,
-        model_details=model_details
+        model_details=model_details,
+        pagination=pagination
     )
 
 @admin_bp.route('/riwayat_training/<int:riwayat_id>')
 @login_required
 def riwayat_training_detail(riwayat_id):
+    page = request.args.get('page', 1, type=int)
     riwayat = RiwayatTraining.query.get_or_404(riwayat_id)
-    riwayat_list = RiwayatTraining.query.order_by(RiwayatTraining.tanggal_training.desc()).all()
+    pagination = RiwayatTraining.query.order_by(RiwayatTraining.tanggal_training.desc()).paginate(
+        page=page, per_page=10, error_out=False
+    )
+    riwayat_list = pagination.items
     hasil = build_hasil_from_riwayat(riwayat)
     model_details = load_model_details()
     return render_template(
@@ -343,7 +377,8 @@ def riwayat_training_detail(riwayat_id):
         riwayat_list=riwayat_list,
         selected_riwayat=riwayat,
         total_data=riwayat.jumlah_data,
-        model_details=model_details
+        model_details=model_details,
+        pagination=pagination
     )
 
 @admin_bp.route('/proses_training', methods=['POST'])

@@ -46,7 +46,10 @@
           <i class="fas fa-diagram-project me-1"></i> Lihat Data Latih/Uji
         </a>
       </div>
-      <span class="text-muted small">Total: {{ ulasan_list|length }} data</span>
+      <span class="text-muted small"
+        >Total: {{ pagination.total if pagination else ulasan_list|length }}
+        data</span
+      >
     </div>
   </div>
   <div class="card-body">
@@ -63,7 +66,10 @@
         <tbody>
           {% for item in ulasan_list %}
           <tr>
-            <td class="text-muted">{{ loop.index }}</td>
+            <td class="text-muted">
+              {{ loop.index0 + 1 + ((pagination.page - 1) * pagination.per_page
+              if pagination else 0) }}
+            </td>
             <td>{{ item.teks_asli }}</td>
             <td>{{ item.tanggal_input.strftime('%d-%m-%Y') }}</td>
             <td>
@@ -120,6 +126,47 @@
     </div>
   </div>
 </div>
+
+{% if pagination and pagination.pages > 1 %}
+<nav aria-label="Data Ulasan Pagination" class="mt-3">
+  <ul class="pagination justify-content-center mb-0">
+    <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+      {% if pagination.has_prev %}
+      <a
+        class="page-link"
+        href="{{ url_for('admin.data_ulasan', page=pagination.prev_num) }}"
+        >Sebelumnya</a
+      >
+      {% else %}
+      <span class="page-link">Sebelumnya</span>
+      {% endif %}
+    </li>
+    {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1,
+    left_current=2, right_current=2) %} {% if page_num %}
+    <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+      <a
+        class="page-link"
+        href="{{ url_for('admin.data_ulasan', page=page_num) }}"
+        >{{ page_num }}</a
+      >
+    </li>
+    {% else %}
+    <li class="page-item disabled"><span class="page-link">...</span></li>
+    {% endif %} {% endfor %}
+    <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+      {% if pagination.has_next %}
+      <a
+        class="page-link"
+        href="{{ url_for('admin.data_ulasan', page=pagination.next_num) }}"
+        >Berikutnya</a
+      >
+      {% else %}
+      <span class="page-link">Berikutnya</span>
+      {% endif %}
+    </li>
+  </ul>
+</nav>
+{% endif %}
 
 <div class="modal fade" id="modalImport" tabindex="-1">
   <div class="modal-dialog">

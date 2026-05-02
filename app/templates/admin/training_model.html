@@ -18,7 +18,7 @@
         <ul class="list-unstyled">
           <li class="mb-2">
             <i class="fas fa-check-circle text-success"></i>
-            <strong>Algoritma:</strong> Complement Naïve Bayes
+            <strong>Algoritma:</strong> Multinomial Naïve Bayes
           </li>
           <li class="mb-2">
             <i class="fas fa-check-circle text-success"></i>
@@ -251,13 +251,14 @@
             {% if model_details %}
             <div class="mb-4">
               <h5 class="fw-bold mb-3">
-                Bagian 1: Ekstraksi Fitur (TF-IDF) - Sampel TF-IDF Tertinggi
+                Bagian 1: Ekstraksi Fitur (TF-IDF) - Rata-rata TF-IDF Tertinggi
               </h5>
               <div class="table-responsive">
                 <table class="table table-bordered table-sm align-middle">
                   <thead class="table-light">
                     <tr>
                       <th>Term</th>
+                      <th>Avg TF-IDF</th>
                       <th>IDF</th>
                     </tr>
                   </thead>
@@ -265,6 +266,7 @@
                     {% for item in model_details.tfidf_top %}
                     <tr>
                       <td>{{ item.term }}</td>
+                      <td>{{ "%.6f"|format(item.mean_tfidf) }}</td>
                       <td>{{ "%.4f"|format(item.idf) }}</td>
                     </tr>
                     {% endfor %}
@@ -298,7 +300,7 @@
             </div>
 
             <div class="mb-4">
-              <h5 class="fw-bold mb-3">Bagian 3: Bobot Fitur ComplementNB</h5>
+              <h5 class="fw-bold mb-3">Bagian 3: Likelihood MultinomialNB</h5>
               <div class="row g-3">
                 {% for group in model_details.likelihoods %}
                 <div class="col-lg-4">
@@ -311,14 +313,16 @@
                         <thead>
                           <tr>
                             <th>Kata</th>
-                            <th>Bobot</th>
+                            <th>Log Prob</th>
+                            <th>Prob</th>
                           </tr>
                         </thead>
                         <tbody>
                           {% for word in group.words %}
                           <tr>
                             <td>{{ word.term }}</td>
-                            <td>{{ "%.6f"|format(word.weight) }}</td>
+                            <td>{{ "%.6f"|format(word.log_prob) }}</td>
+                            <td>{{ "%.6f"|format(word.prob) }}</td>
                           </tr>
                           {% endfor %}
                         </tbody>
@@ -347,8 +351,8 @@
                     <tr>
                       <th>Kelas</th>
                       <th>Log Prior</th>
-                      <th>Bobot Fitur (Sum)</th>
-                      <th>Skor (Log Prior + Bobot)</th>
+                      <th>Log Likelihood (Sum)</th>
+                      <th>Log Posterior</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -356,8 +360,8 @@
                     <tr>
                       <td>{{ cls.label|capitalize }}</td>
                       <td>{{ "%.6f"|format(cls.log_prior) }}</td>
-                      <td>{{ "%.6f"|format(cls.weight_sum) }}</td>
-                      <td>{{ "%.6f"|format(cls.score) }}</td>
+                      <td>{{ "%.6f"|format(cls.log_likelihood_sum) }}</td>
+                      <td>{{ "%.6f"|format(cls.log_posterior) }}</td>
                     </tr>
                     {% endfor %}
                   </tbody>
@@ -376,14 +380,14 @@
                         <thead>
                           <tr>
                             <th>Token</th>
-                            <th>Bobot</th>
+                            <th>Log Prob</th>
                           </tr>
                         </thead>
                         <tbody>
                           {% for token in cls.token_logs %}
                           <tr>
                             <td>{{ token.token }}</td>
-                            <td>{{ "%.6f"|format(token.weight) }}</td>
+                            <td>{{ "%.6f"|format(token.log_prob) }}</td>
                           </tr>
                           {% endfor %}
                         </tbody>
@@ -462,6 +466,54 @@
             </tbody>
           </table>
         </div>
+        {% if pagination and pagination.pages > 1 %}
+        <nav aria-label="Riwayat Training Pagination" class="mt-3">
+          <ul class="pagination justify-content-center mb-0">
+            <li
+              class="page-item {% if not pagination.has_prev %}disabled{% endif %}"
+            >
+              {% if pagination.has_prev %}
+              <a
+                class="page-link"
+                href="{{ url_for('admin.training_model', page=pagination.prev_num) }}"
+                >Sebelumnya</a
+              >
+              {% else %}
+              <span class="page-link">Sebelumnya</span>
+              {% endif %}
+            </li>
+            {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1,
+            left_current=2, right_current=2) %} {% if page_num %}
+            <li
+              class="page-item {% if page_num == pagination.page %}active{% endif %}"
+            >
+              <a
+                class="page-link"
+                href="{{ url_for('admin.training_model', page=page_num) }}"
+                >{{ page_num }}</a
+              >
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+              <span class="page-link">...</span>
+            </li>
+            {% endif %} {% endfor %}
+            <li
+              class="page-item {% if not pagination.has_next %}disabled{% endif %}"
+            >
+              {% if pagination.has_next %}
+              <a
+                class="page-link"
+                href="{{ url_for('admin.training_model', page=pagination.next_num) }}"
+                >Berikutnya</a
+              >
+              {% else %}
+              <span class="page-link">Berikutnya</span>
+              {% endif %}
+            </li>
+          </ul>
+        </nav>
+        {% endif %}
       </div>
     </div>
   </div>
