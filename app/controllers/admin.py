@@ -277,6 +277,27 @@ def hapus_ulasan(id):
     db.session.commit()
     flash('Ulasan berhasil dihapus.', 'success')
     return redirect(url_for('admin.data_ulasan'))
+
+@admin_bp.route('/edit_ulasan/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_ulasan(id):
+    ulasan = Ulasan.query.get_or_404(id)
+
+    if request.method == 'POST':
+        teks_asli = request.form.get('teks_asli', '').strip()
+        if not teks_asli:
+            flash('Teks ulasan tidak boleh kosong.', 'warning')
+            return render_template('admin/edit_ulasan.html', ulasan=ulasan)
+
+        ulasan.teks_asli = teks_asli
+        ulasan.teks_clean = None
+        ulasan.label = None
+        ulasan.tipe_data = None
+        db.session.commit()
+        flash('Ulasan berhasil diperbarui.', 'success')
+        return redirect(url_for('admin.data_ulasan'))
+
+    return render_template('admin/edit_ulasan.html', ulasan=ulasan)
     
 @admin_bp.route('/tambah_manual', methods=['GET', 'POST'])
 @login_required

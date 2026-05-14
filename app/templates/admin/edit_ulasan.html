@@ -1,0 +1,46 @@
+{% extends "base.html" %} {% block page_title %}Edit Ulasan{% endblock %} {%
+block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h1 class="h3 mb-1">Edit Ulasan</h1>
+    <p class="text-muted mb-0">Perbarui teks ulasan mentah.</p>
+  </div>
+  <a
+    href="{{ url_for('admin.data_ulasan') }}"
+    class="btn btn-outline-secondary"
+  >
+    Kembali
+  </a>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    <form
+      method="POST"
+      action="{{ url_for('admin.edit_ulasan', id=ulasan.id) }}"
+    >
+      <div class="mb-3">
+        <label for="teks_asli" class="form-label">Teks Ulasan</label>
+        <textarea
+          class="form-control"
+          id="teks_asli"
+          name="teks_asli"
+          rows="5"
+          required
+        >
+{{ ulasan.teks_asli }}</textarea
+        >
+        <div class="form-text">
+          Mengubah teks akan mengosongkan hasil preprocessing sebelumnya.
+        </div>
+      </div>
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+        <a href="{{ url_for('admin.data_ulasan') }}" class="btn btn-secondary">
+          Batal
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

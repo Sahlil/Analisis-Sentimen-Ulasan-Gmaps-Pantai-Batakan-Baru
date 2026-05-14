@@ -80,6 +80,12 @@
                 >
                   Detail
                 </a>
+                <a
+                  href="{{ url_for('admin.edit_ulasan', id=item.id) }}"
+                  class="btn btn-sm btn-outline-warning"
+                >
+                  Edit
+                </a>
                 <form
                   action="{{ url_for('admin.hapus_ulasan', id=item.id) }}"
                   method="POST"

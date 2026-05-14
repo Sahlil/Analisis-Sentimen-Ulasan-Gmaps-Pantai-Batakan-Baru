@@ -77,7 +77,9 @@ def preprocess_debug_steps(text):
             'normalized_tokens': [],
             'negation_tokens': [],
             'stemmed_tokens': [],
-            'final_tokens': []
+            'final_tokens': [],
+            'lexicon_scores': [],
+            'total_score': 0
         }
 
     original = text
@@ -128,6 +130,13 @@ def preprocess_debug_steps(text):
             if stemmed_word.strip():
                 final_tokens.append(stemmed_word)
 
+    lexicon_scores = []
+    total_score = 0
+    for token in final_tokens:
+        score = LEXICON.get(token, 0)
+        lexicon_scores.append({'token': token, 'score': score})
+        total_score += score
+
     return {
         'original': original,
         'lowercased': lowercased,
@@ -137,7 +146,9 @@ def preprocess_debug_steps(text):
         'normalized_tokens': normalized_tokens,
         'negation_tokens': negation_tokens,
         'stemmed_tokens': stemmed_tokens,
-        'final_tokens': final_tokens
+        'final_tokens': final_tokens,
+        'lexicon_scores': lexicon_scores,
+        'total_score': total_score
     }
 
 def label_sentiment(tokens):

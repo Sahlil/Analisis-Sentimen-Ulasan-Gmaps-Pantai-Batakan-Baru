@@ -77,6 +77,6 @@ class RiwayatTraining(db.Model):
             'matrix': {
                 'negatif': [self.neg_neg, self.neg_neu, self.neg_pos],
                 'netral': [self.neu_neg, self.neu_neu, self.neu_pos],
-                'positif': [self.pos_neg, self.pos_neu, self.pos_pos]
+                'positif': [self.pos_neg, self.pos_neu, self.pos_pos]   
             }
         }
