@@ -41,3 +41,4 @@ app/controllers/__pycache__/*
 .app/controllers/__pycache__/*
 app/__pycache__/models.cpython-311.pyc
 app/controllers/__pycache__/admin.cpython-311.pyc
+.env
