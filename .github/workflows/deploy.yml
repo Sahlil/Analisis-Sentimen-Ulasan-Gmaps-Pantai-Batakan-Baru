@@ -1,0 +1,34 @@
+name: Auto Deploy Flask ke cPanel
+
+on:
+  push:
+    branches:
+      - main  # Ubah ke 'master' jika branch utamamu bernama master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Eksekusi Perintah Deploy via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          script: |
+            # Masuk ke folder project
+            cd /home/sahlilmy/domains/ta.sahlil.my.id
+            
+            # Tarik kode terbaru dari GitHub
+            git pull origin main
+            
+            # Masuk ke Virtual Environment Python 3.11
+            source /home/sahlilmy/virtualenv/domains/ta.sahlil.my.id/3.11/bin/activate
+            
+            # Install library baru (jika ada perubahan di requirements.txt)
+            pip install -r requirements.txt
+            
+            # Restart aplikasi Flask (Phusion Passenger)
+            mkdir -p tmp
+            touch tmp/restart.txt

@@ -10,7 +10,7 @@ if load_dotenv:
 
 
 class Config:
-    SQLALCHEMY_DATABASE_URI = os.getenv(
+    # SQLALCHEMY_DATABASE_URI = os.getenv(
         'DATABASE_URL',
         'mysql+pymysql://root:@localhost/ta_db'
     )
