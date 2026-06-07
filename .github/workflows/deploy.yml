@@ -1,0 +1,25 @@
+name: Auto Deploy Flask ke cPanel
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Eksekusi Perintah Deploy via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          script: |
+            cd /home/sahlilmy/domains/ta.sahlil.my.id
+            git pull origin main
+            source /home/sahlilmy/virtualenv/domains/ta.sahlil.my.id/3.11/bin/activate
+            pip install -r requirements.txt
+            mkdir -p tmp
+            touch tmp/restart.txt
