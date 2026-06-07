@@ -23,3 +23,11 @@ jobs:
             pip install -r requirements.txt
             mkdir -p tmp
             touch tmp/restart.txt
+          
+            set -e
+            cd /home/sahlilmy/domains/ta.sahlil.my.id
+            git pull origin main
+            source /home/sahlilmy/virtualenv/domains/ta.sahlil.my.id/3.11/bin/activate
+            pip install -r requirements.txt
+            mkdir -p tmp
+            touch tmp/restart.txt

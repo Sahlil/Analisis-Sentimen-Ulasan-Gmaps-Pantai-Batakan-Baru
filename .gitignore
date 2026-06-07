@@ -42,3 +42,22 @@ app/controllers/__pycache__/*
 app/__pycache__/models.cpython-311.pyc
 app/controllers/__pycache__/admin.cpython-311.pyc
 .env
+
+# Mengabaikan SEMUA file cache Python di folder mana pun
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Mengabaikan file sistem/virtual environment lokal
+venv/
+env/
+.env
+
+# Mengabaikan file khusus cPanel/Server
+passenger_wsgi.py
+tmp/
+.htaccess
+
+# Mengabaikan model Machine Learning (Naive Bayes) yang nilainya bisa berubah
+*.pkl
+model_storage/
