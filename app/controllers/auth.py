@@ -1,7 +1,8 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_user, logout_user, login_required, current_user
 from app.models import User
-from app.lib.machine_learning import predict_single
+from app.lib.machine_learning import predict_single_clean
+from app.lib.preprocessing import preprocess_text
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -23,7 +24,9 @@ def demo():
     if request.method == 'POST':
         teks_input = request.form.get('teks_input', '').strip()
         if teks_input:
-            prediksi = predict_single(teks_input)
+            tokens = preprocess_text(teks_input)
+            teks_clean = ' '.join(tokens)
+            prediksi = predict_single_clean(teks_clean) if teks_clean else 'Netral'
             prediksi_lower = prediksi.lower() if isinstance(prediksi, str) else ''
             if prediksi_lower in ['positif', 'negatif', 'netral']:
                 hasil = prediksi_lower
