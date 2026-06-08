@@ -393,7 +393,7 @@
         <div class="nav-section-title">Super Admin</div>
         <ul class="nav flex-column">
           <li class="nav-item">
-            <a href="{{ url_for('user_mgmt.index') }}" class="nav-link">
+            <a href="{{ url_for('user_mgmt.index') }}" class="nav-link {% if request.endpoint == 'users' %}active{% endif %}">
               <i class="fas fa-users"></i>
               <span>Kelola User</span>
             </a>
