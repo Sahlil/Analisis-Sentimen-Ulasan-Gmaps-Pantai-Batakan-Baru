@@ -37,7 +37,7 @@
               placeholder="Contoh: Pantainya indah tapi sayangnya banyak sampah..."
               required
             >
-{{ teks_awal }}</textarea
+{{ teks_input }}</textarea
             >
             <div class="form-text">
               Gunakan kalimat natural agar hasil lebih akurat.
@@ -55,13 +55,13 @@
           <hr />
           <h5 class="mb-3">Hasil Prediksi</h5>
 
-          {% if hasil == 'positif' %}
+          {% set hasil_lower = hasil|lower %} {% if hasil_lower == 'positif' %}
           <h1 class="display-5 text-success fw-bold">POSITIF</h1>
           <div class="alert alert-success mb-0">
             Sistem mendeteksi nada kepuasan dalam kalimat ini.
           </div>
 
-          {% elif hasil == 'negatif' %}
+          {% elif hasil_lower == 'negatif' %}
           <h1 class="display-5 text-danger fw-bold">NEGATIF</h1>
           <div class="alert alert-danger mb-0">
             Sistem mendeteksi keluhan atau kekecewaan.

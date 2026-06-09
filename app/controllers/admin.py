@@ -441,13 +441,11 @@ def simulasi():
     teks_clean = ''
 
     if request.method == 'POST':
-        teks_input = request.form.get('teks_input', '')
+        teks_input = request.form.get('teks_input', '').strip()
 
         if teks_input:
             tokens = preprocess_text(teks_input)
             teks_clean = " ".join(tokens)
-
-        if teks_clean:
             hasil_prediksi = predict_single_clean(teks_clean)
 
     return render_template('admin/simulasi.html',
