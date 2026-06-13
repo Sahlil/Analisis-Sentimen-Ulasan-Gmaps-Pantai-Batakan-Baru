@@ -2,6 +2,7 @@ import os
 import pickle
 import pandas as pd
 import numpy as np
+import json
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from sqlalchemy import func
@@ -9,6 +10,9 @@ from app import db
 from app.models import Ulasan, RiwayatTraining
 from app.lib.preprocessing import preprocess_text, label_sentiment, preprocess_debug_steps
 from app.lib.machine_learning import train_naive_bayes, predict_single, predict_single_clean, MODEL_PATH
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+SMOTE_METADATA_PATH = os.path.join(BASE_DIR, 'smote_metadata.json')
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -285,13 +289,18 @@ def edit_ulasan(id):
 
     if request.method == 'POST':
         teks_asli = request.form.get('teks_asli', '').strip()
+        label_baru = request.form.get('label', '').strip().lower()
         if not teks_asli:
             flash('Teks ulasan tidak boleh kosong.', 'warning')
             return render_template('admin/edit_ulasan.html', ulasan=ulasan)
 
+        if ulasan.teks_asli != teks_asli:
+            ulasan.teks_clean = None
+          
         ulasan.teks_asli = teks_asli
-        ulasan.teks_clean = None
-        ulasan.label = None
+        if label_baru in ['positif', 'negatif', 'netral']:
+            ulasan.label = label_baru
+        
         ulasan.tipe_data = None
         db.session.commit()
         flash('Ulasan berhasil diperbarui.', 'success')
@@ -370,6 +379,16 @@ def training_model():
     split_ratio = latest.rasio_split if latest else '80:20'
     total_data = latest.jumlah_data if latest else None
     model_details = load_model_details()
+
+    smote_data = {"sebelum": {}, "sesudah": {}}
+    
+    if os.path.exists(SMOTE_METADATA_PATH):
+        try:
+            with open(SMOTE_METADATA_PATH, 'r', encoding='utf-8') as f:
+                smote_data = json.load(f)
+        except Exception as e:
+            print(f"Gagal memuat data SMOTE: {e}")
+
     return render_template(
         'admin/training_model.html',
         hasil=hasil,
@@ -377,7 +396,8 @@ def training_model():
         riwayat_list=riwayat_list,
         total_data=total_data,
         model_details=model_details,
-        pagination=pagination
+        pagination=pagination,
+        smote_data=smote_data  
     )
 
 @admin_bp.route('/riwayat_training/<int:riwayat_id>')

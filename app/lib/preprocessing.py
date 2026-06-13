@@ -1,8 +1,16 @@
 import re
+import pandas as pd
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 from nltk.corpus import stopwords
 import nltk
-from app.lib.dictionary import NORMALISASI, LEXICON, STOPWORD_TAMBAHAN, KATA_NEGASI
+from app.lib.dictionary import (
+    NORMALISASI,
+    LEXICON,
+    LEXICON_COMPONENT_TOKENS,
+    LEXICON_PATTERN_LENGTHS,
+    STOPWORD_TAMBAHAN,
+    KATA_NEGASI,
+)
 
 factory = StemmerFactory()
 stemmer = factory.create_stemmer()
@@ -15,18 +23,49 @@ except LookupError:
 list_stopwords = set(stopwords.words('indonesian'))
 list_stopwords = list_stopwords - KATA_NEGASI
 
+
+def _score_tokens_with_lexicon(tokens):
+    lexicon_lengths = LEXICON_PATTERN_LENGTHS or [1]
+    matches = []
+    total_score = 0
+
+    i = 0
+    while i < len(tokens):
+        matched = False
+
+        for length in lexicon_lengths:
+            if length <= 0 or i + length > len(tokens):
+                continue
+
+            candidate = '_'.join(tokens[i:i + length])
+            if candidate in LEXICON:
+                score = LEXICON[candidate]
+                matches.append({'token': candidate, 'score': score})
+                total_score += score
+                i += length
+                matched = True
+                break
+
+        if not matched:
+            i += 1
+
+    return matches, total_score
+
 def preprocess_text(text):
     if not isinstance(text, str) or not text.strip():
         return []
 
+    # 1. Case Folding & Pembersihan Karakter
     text = text.lower()
     text = re.sub(r'[^a-z\s]', ' ', text) 
     text = re.sub(r'\s+', ' ', text).strip()
     
     tokens = text.split()
 
+    # 2. Normalisasi (Memperbaiki typo / bahasa gaul)
     tokens = [NORMALISASI.get(word, word) for word in tokens]
 
+    # 3. Penanganan Negasi (Menggabungkan kata "tidak" dengan kata setelahnya)
     new_tokens = []
     i = 0
     while i < len(tokens):
@@ -44,25 +83,29 @@ def preprocess_text(text):
     
     tokens = new_tokens
 
+    # 4. Stemming & Stopword Removal (Dengan Proteksi Lexicon)
     processed_tokens = []
     for token in tokens:
-        stemmed_word = token 
-
+        # Lakukan stemming, perhatikan jika token adalah kata negasi gabungan
         if '_' in token:
             parts = token.split('_')
             if len(parts) > 1 and parts[1]: 
                 kata_dasar = stemmer.stem(parts[1])
-                stemmed_word = f"{parts[0]}_{kata_dasar}"
+                stemmed_token = f"{parts[0]}_{kata_dasar}"
             else:
-                stemmed_word = token
+                stemmed_token = token
         else:
-            if token: 
-                stemmed_word = stemmer.stem(token)
+            stemmed_token = stemmer.stem(token)
 
-        if (stemmed_word not in list_stopwords and 
-            stemmed_word not in STOPWORD_TAMBAHAN) or (stemmed_word in LEXICON):
-            if stemmed_word.strip():
-                processed_tokens.append(stemmed_word)
+        # -- LOGIKA PROTEKSI STOPWORD BARU --
+        # Cek apakah kata ini masuk dalam daftar stopword
+        is_stopword = (stemmed_token in list_stopwords) or (stemmed_token in STOPWORD_TAMBAHAN)
+        is_protected = (stemmed_token in LEXICON_COMPONENT_TOKENS) or (stemmed_token in LEXICON)
+
+        # Hanya simpan kata yang BUKAN stopword, ATAU merupakan kata yang dilindungi
+        if not is_stopword or is_protected:
+            if stemmed_token.strip():
+                processed_tokens.append(stemmed_token)
 
     return processed_tokens
 
@@ -125,17 +168,14 @@ def preprocess_debug_steps(text):
 
     final_tokens = []
     for stemmed_word in stemmed_tokens:
-        if (stemmed_word not in list_stopwords and
-            stemmed_word not in STOPWORD_TAMBAHAN) or (stemmed_word in LEXICON):
+        if (
+            stemmed_word not in list_stopwords
+            and stemmed_word not in STOPWORD_TAMBAHAN
+        ) or (stemmed_word in LEXICON) or (stemmed_word in LEXICON_COMPONENT_TOKENS):
             if stemmed_word.strip():
                 final_tokens.append(stemmed_word)
 
-    lexicon_scores = []
-    total_score = 0
-    for token in final_tokens:
-        score = LEXICON.get(token, 0)
-        lexicon_scores.append({'token': token, 'score': score})
-        total_score += score
+    lexicon_scores, total_score = _score_tokens_with_lexicon(final_tokens)
 
     return {
         'original': original,
@@ -152,10 +192,7 @@ def preprocess_debug_steps(text):
     }
 
 def label_sentiment(tokens):
-    score = 0
-    for token in tokens:
-        if token in LEXICON:
-            score += LEXICON[token]
+    score = _score_tokens_with_lexicon(tokens)[1]
             
     if score > 0:
         return "positif"

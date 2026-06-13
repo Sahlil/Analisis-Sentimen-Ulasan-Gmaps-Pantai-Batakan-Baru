@@ -27,11 +27,19 @@ block content %}
           name="teks_asli"
           rows="5"
           required
-        >
-{{ ulasan.teks_asli }}</textarea
-        >
+        > {{ ulasan.teks_asli }}</textarea>
         <div class="form-text">
           Mengubah teks akan mengosongkan hasil preprocessing sebelumnya.
+        </div>
+        <div class="form-group mb-3">
+            <label for="label">Label Sentimen (Opsional/Manual)</label>
+            <select name="label" id="label" class="form-control">
+                <option value="" {% if not ulasan.label %}selected{% endif %}>Belum Ada Label</option>
+                <option value="positif" {% if ulasan.label == 'positif' %}selected{% endif %}>Positif</option>
+                <option value="netral" {% if ulasan.label == 'netral' %}selected{% endif %}>Netral</option>
+                <option value="negatif" {% if ulasan.label == 'negatif' %}selected{% endif %}>Negatif</option>
+            </select>
+            <small class="text-muted">Ubah label jika dirasa hasil sistem kurang tepat.</small>
         </div>
       </div>
       <div class="d-flex gap-2">

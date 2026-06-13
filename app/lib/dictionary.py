@@ -1,3 +1,11 @@
+import csv
+import os
+import re
+
+import pandas as pd
+# from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+
 NORMALISASI = {
     # Kata ganti dan umum
     "sy": "saya", "aq": "saya", "aku": "saya", "gw": "saya", "gue": "saya",
@@ -135,14 +143,30 @@ NORMALISASI = {
     "worth": "sepadan",
     "crowded": "ramai",
     "jorok": "kotor",
-    "tigat": "kotor",
+    "rigat": "kotor",
     "bising": "berisik",
-    "coklat": "keruh",      # "air coklat" di konteks pantai = air keruh
+    "coklat": "keruh",      
     "nyari": "cari",
     "nyewa": "sewa",
     "nyaman": "nyaman",
     "pemda": "pemerintah",
-    "bjm": "banjarmasin",   # singkatan kota, netral
+    "bjm": "banjarmasin",  
+    "kada": "tidak",
+    "kd": "tidak",
+    "kedada": "tidak ada",
+    "kdd": "tidak ada",
+    "larang": "mahal",
+    "bungas": "bagus", 
+    "langkar": "cantik",
+    "banyu": "air",
+    "hanyar": "baru",
+    "lawas": "lama",
+    "kelotok": "perahu",
+    "klotok": "perahu",
+    "kuda": "kuda",
+    "pacah": "pecah",
+    "handak": "mau",
+    "parak": "dekat",
 }
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -152,26 +176,17 @@ NORMALISASI = {
 #   +1 / -1 : sentimen lemah, kata umum/kontekstual
 #   Dihapus : kata ambigu, nama tempat, kata netral domain wisata
 # ══════════════════════════════════════════════════════════════════════════════
-LEXICON = {
+CUSTOM_DOMAIN_LEXICON = {
     # ── Positif kuat ──────────────────────────────────────────────────────────
     "bagus": 2, "indah": 2, "bersih": 2, "rekomendasi": 2, "mantap": 2,
     "fotoable": 2, "keren": 2, "puas": 2, "asik": 2,
-    "jernih": 2,        # air jernih = positif kuat untuk wisata pantai
-    "cantik": 2,
-    "memukau": 2,
-    "sepadan": 2,       # worth it
+    "jernih": 2, "cantik": 2, "memukau": 2, "sepadan": 2,
 
     # ── Positif standar ───────────────────────────────────────────────────────
     "nyaman": 1, "ramah": 1, "menarik": 1, "luas": 1, "murah": 1,
     "tenang": 1, "aman": 1, "enak": 1, "baik": 1, "senang": 1,
-    "terjangkau": 1, "cocok": 1,
-    "nikmat": 1,        # TAMBAH: "menikmati" → "nikmat", sering di ulasan positif
-    "sunset": 1,        # TAMBAH: sunset sering disebut sebagai daya tarik positif
-    "gratis": 1,        # TAMBAH: gratis = nilai plus
-    "rindang": 1,       # TAMBAH: pohon rindang = nyaman
-    "segar": 1,         # TAMBAH: udara segar = positif
-    "asri": 1,          # TAMBAH: suasana asri = positif
-    "tertawa": 1,       # wkwk/hehe setelah normalisasi = ekspresi senang
+    "terjangkau": 1, "cocok": 1, "nikmat": 1, "sunset": 1, 
+    "gratis": 1, "rindang": 1, "segar": 1, "asri": 1, "tertawa": 1,
 
     # ── Negasi positif ────────────────────────────────────────────────────────
     "tidak_mahal": 2, "tidak_kotor": 2, "tidak_buruk": 2,
@@ -179,53 +194,114 @@ LEXICON = {
     "tidak_bising": 1, "tidak_ramai": 1, "tidak_berserakan": 2,
 
     # ── Negatif fatal ─────────────────────────────────────────────────────────
-    "sampah": -4, "pungli": -5,
-    "kumuh": -3,        # naik dari -2
-    "bau": -3,          # naik dari -2
-    "jorok": -3,        # TAMBAH: jorok = sangat kotor
+    "sampah": -4, "pungli": -5, "kumuh": -3, "bau": -3, "jorok": -3, 
     "berlumpur": -2, "gatal": -2,
 
     # ── Negatif kuat ──────────────────────────────────────────────────────────
     "kotor": -2, "ribut": -2, "berisik": -2, "parah": -2,
-    "jelek": -2, "kecewa": -3, "buruk": -2,
-    "keruh": -2,        # air keruh = negatif untuk wisata pantai
-    "najis": -3,
-    "rusak": -2,
-    "hambur": -2,       # berhamburan (sampah)
-    "bising": -2,       # TAMBAH: bising = gangguan
-    "kacau": -2,        # TAMBAH: kacau = kondisi buruk
-    "macet": -2,        # TAMBAH (naik dari -1 ke -2): macet = gangguan serius
-    "sera": -2,         # berserakan → stem "sera", sering muncul di ulasan negatif
+    "jelek": -2, "kecewa": -3, "buruk": -2, "keruh": -2, 
+    "najis": -3, "rusak": -2, "hambur": -2, "bising": -2, 
+    "kacau": -2, "macet": -2, "sera": -2,
 
     # ── Negatif standar ───────────────────────────────────────────────────────
     "kurang": -1, "sulit": -1, "panas": -1, "terganggu": -1,
-    "mahal": -2, "sayang": -1,  # "sayang" dalam arti "disayangkan"
-    "kok": -1, "tagih": -1, "bayar": -1, "bingung": -1,
+    "mahal": -2, "sayang": -1, "kok": -1, "tagih": -1, "bayar": -1, "bingung": -1,
 
     # ── Negasi negatif ────────────────────────────────────────────────────────
     "tidak_bagus": -2, "tidak_rekomendasi": -2, "tidak_bersih": -2,
     "tidak_mantap": -2, "tidak_ada": -1, "tidak_bisa": -1,
-    "kurang_nyaman": -1, "kurang_bagus": -1,
-    "kurang_bersih": -2, "kurang_puas": -2, "kurang_tata": -1,
-
-    # ── DIHAPUS dari kamus lama (alasan) ─────────────────────────────────────
-    # "seru"       → diganti asik, seru sudah dinormalisasi ke asik
-    # "foto"       → netral, semua wisata ada foto
-    # "spot"       → netral, kata umum
-    # "hammock"    → netral, fasilitas biasa
-    # "weekday"    → netral, bukan sentimen
-    # "tolong"     → ambigu, bisa muncul di kalimat positif
-    # "dua"        → sangat ambigu, "dua kali datang" ≠ negatif
-    # "tindak"     → terlalu spesifik, jarang muncul
-    # "crowded"    → sudah dinormalisasi ke "ramai" yang netral
-    # "double"     → ambigu
-    # "duplikat"   → jarang muncul
-    # "karokean"   → terlalu spesifik
-    # "aneh"       → ambigu
-    # "perbaiki"   → ambigu (bisa positif "sudah diperbaiki")
-    # "benahi"     → ambigu
-    # "banget"     → penguat, bukan sentimen sendiri
+    "kurang_nyaman": -1, "kurang_bagus": -1, "kurang_bersih": -2, 
+    "kurang_puas": -2, "kurang_tata": -1,
 }
+
+def _normalize_lexicon_word(word):
+    if word is None:
+        return ""
+    text = str(word).lower().strip()
+    if not text:
+        return ""
+    text = re.sub(r"[^a-z\s]", " ", text)
+    text = re.sub(r"\s+", " ", text).strip()
+
+    normalized_tokens = []
+    for token in text.split():
+        # NORMALISASI harus sudah didefinisikan di atas kode ini
+        token = NORMALISASI.get(token, token)
+        if token:
+            normalized_tokens.append(token)
+    return "_".join(normalized_tokens)
+
+def _load_lexicon_from_tsv(file_name, target_lexicon):
+    file_path = os.path.join(BASE_DIR, file_name)
+    if not os.path.exists(file_path):
+        print(f"File {file_name} tidak ditemukan di {file_path}")
+        return target_lexicon
+
+    with open(file_path, "r", encoding="utf-8", newline="") as handle:
+        reader = csv.DictReader(handle, delimiter="\t")
+        for row in reader:
+            word = _normalize_lexicon_word(row.get("word"))
+            if not word:
+                continue
+            raw_weight = row.get("weight", "")
+            try:
+                weight = int(float(raw_weight))
+            except (TypeError, ValueError):
+                continue
+            
+            # Khusus untuk InSet, bobot dijumlahkan jika ada duplikat dalam file TSV
+            target_lexicon[word] = target_lexicon.get(word, 0) + weight
+
+    return target_lexicon
+
+# =====================================================================
+# 2. IMPLEMENTASI HYBRID LEXICON
+# =====================================================================
+
+# A. Inisialisasi dictionary utama
+LEXICON = {}
+
+# B. Muat Baseline (InSet Lexicon)
+_load_lexicon_from_tsv("positive.tsv", LEXICON)
+_load_lexicon_from_tsv("negative.tsv", LEXICON)
+print(f"Memuat {len(LEXICON)} kata dasar dari InSet Lexicon.")
+
+# C. Terapkan Domain-Specific Adaptation (Menimpa dengan kamus pantai)
+kata_ditimpa = 0
+kata_baru = 0
+
+for custom_word, custom_weight in CUSTOM_DOMAIN_LEXICON.items():
+    # Normalisasi agar formatnya pasti cocok
+    normalized_word = _normalize_lexicon_word(custom_word)
+    if not normalized_word:
+        continue
+    
+    if normalized_word in LEXICON:
+        kata_ditimpa += 1
+    else:
+        kata_baru += 1
+        
+    # OVERRIDE: Gunakan '=' bukan '+=' agar skor InSet diganti total
+    # Contoh: 'bagus' di InSet -4, akan diganti menjadi 2 sesuai kamusmu
+    LEXICON[normalized_word] = custom_weight
+
+print(f"Hyrbid Lexicon Sukses: {kata_ditimpa} skor kata InSet dikoreksi, {kata_baru} kata spesifik ditambahkan.")
+print(f"Total kata di Lexicon siap pakai: {len(LEXICON)}")
+
+# =====================================================================
+
+# Ekstraksi untuk sistem pencocokan frasa di preprocessing
+LEXICON_COMPONENT_TOKENS = {
+    part
+    for key in LEXICON
+    for part in key.split("_")
+    if part
+}
+
+LEXICON_PATTERN_LENGTHS = sorted(
+    {len(key.split("_")) for key in LEXICON},
+    reverse=True
+)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # STOPWORD TAMBAHAN — domain-specific

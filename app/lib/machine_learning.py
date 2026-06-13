@@ -1,5 +1,6 @@
 import pickle
 import os
+import json
 import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -9,10 +10,12 @@ from sklearn.metrics import accuracy_score, classification_report, confusion_mat
 from app import db
 from app.models import Ulasan, RiwayatTraining
 from imblearn.over_sampling import SMOTE
+from collections import Counter
 from app.lib.preprocessing import preprocess_text
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 MODEL_PATH = os.path.join(BASE_DIR, 'model_storage', 'sentiment_model.pkl')
+SMOTE_METADATA_PATH = os.path.join(BASE_DIR, 'smote_metadata.json')
 
 def train_naive_bayes(test_size=0.2, train_size=None, split_ratio=None):
     data = Ulasan.query.filter(Ulasan.teks_clean != None, Ulasan.label != None).all()
@@ -76,8 +79,12 @@ def train_naive_bayes(test_size=0.2, train_size=None, split_ratio=None):
         )
     db.session.commit()
 
+    distribusi_sebelum = dict(Counter(y_train))
+
     smote = SMOTE(random_state=42)
     x_train_res, y_train_res = smote.fit_resample(x_train, y_train)
+
+    distribusi_sesudah = dict(Counter(y_train_res))
 
     clf = MultinomialNB()
     clf.fit(x_train_res, y_train_res)
@@ -121,6 +128,8 @@ def train_naive_bayes(test_size=0.2, train_size=None, split_ratio=None):
     db.session.add(riwayat)
     db.session.commit()
 
+    save_smote_metadata(distribusi_sebelum, distribusi_sesudah)
+
     with open(MODEL_PATH, 'wb') as f:
         pickle.dump((vectorizer, clf), f)
 
@@ -133,9 +142,21 @@ def train_naive_bayes(test_size=0.2, train_size=None, split_ratio=None):
         "jumlah_data_awal": len(df),
         "jumlah_data_setelah_smote": len(y_train_res),
         "split_train": train_size,
-        "split_test": test_size
+        "split_test": test_size,
+        "distribusi_kelas_sebelum_smote": distribusi_sebelum,
+        "distribusi_kelas_sesudah_smote": distribusi_sesudah
     }
 
+
+def save_smote_metadata(data_before, data_after):
+    payload = {
+        "sebelum": data_before,
+        "sesudah": data_after,
+    }
+
+    with open(SMOTE_METADATA_PATH, 'w', encoding='utf-8') as f:
+        json.dump(payload, f, ensure_ascii=False, indent=2)
+ 
 def predict_single(text_raw):
     try:
         with open(MODEL_PATH, 'rb') as f:
