@@ -2,7 +2,6 @@ import pickle
 import os
 import json
 import pandas as pd
-import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import MultinomialNB
@@ -39,11 +38,7 @@ def train_naive_bayes(test_size=0.2, train_size=None, split_ratio=None):
     } for d in data])
 
 
-    vectorizer = TfidfVectorizer(ngram_range=(1,2))
-    x = vectorizer.fit_transform(df['text'])
     y = df['label']
-
-    idx_all = np.arange(len(df))
 
     split_kwargs = {
         'test_size': test_size,
@@ -53,14 +48,18 @@ def train_naive_bayes(test_size=0.2, train_size=None, split_ratio=None):
     if train_size is not None:
         split_kwargs['train_size'] = train_size
 
-    idx_train, idx_test, y_train, y_test = train_test_split(idx_all, y, **split_kwargs)
-    x_train = x[idx_train]
-    x_test = x[idx_test]
+    # Split data SEBELUM vektorisasi untuk menghindari data leakage
+    df_train, df_test, y_train, y_test = train_test_split(df, y, **split_kwargs)
+
+    # fit_transform hanya pada data training, transform saja pada data testing
+    vectorizer = TfidfVectorizer(ngram_range=(1,2))
+    x_train = vectorizer.fit_transform(df_train['text'])
+    x_test = vectorizer.transform(df_test['text'])
 
     # Tandai data latih dan uji pada tabel ulasan
     all_ids = df['id'].tolist()
-    train_ids = df.iloc[idx_train]['id'].tolist()
-    test_ids = df.iloc[idx_test]['id'].tolist()
+    train_ids = df_train['id'].tolist()
+    test_ids = df_test['id'].tolist()
 
     if all_ids:
         Ulasan.query.filter(Ulasan.id.in_(all_ids)).update(
