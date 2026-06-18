@@ -71,6 +71,18 @@ def preprocess_text(text):
     while i < len(tokens):
         if tokens[i] in KATA_NEGASI and (i + 1) < len(tokens):
             word_next = tokens[i+1]
+            
+            # --- TAMBAHAN LOGIKA KHUSUS UNTUK KATA "ADA" ---
+            if word_next == "ada" and (i + 2) < len(tokens):
+                word_after_ada = tokens[i+2]
+                if word_after_ada.strip():
+                    # Gabungkan menjadi 3 kata: "tidak_ada_sampah"
+                    new_tokens.append(f"{tokens[i]}_ada_{word_after_ada}")
+                    i += 3
+                    continue # Lompat 3 langkah dan lanjut ke iterasi berikutnya
+            # -----------------------------------------------
+
+            # Jika bukan kata "ada", lakukan penggabungan normal (2 kata)
             if word_next.strip():
                 new_tokens.append(f"{tokens[i]}_{word_next}")
                 i += 2

@@ -192,6 +192,7 @@ CUSTOM_DOMAIN_LEXICON = {
     "tidak_mahal": 2, "tidak_kotor": 2, "tidak_buruk": 2,
     "tidak_jelek": 2, "tidak_parah": 2,
     "tidak_bising": 1, "tidak_ramai": 1, "tidak_berserakan": 2,
+    "tidak_ada_sampah": 2, "tidak_ada_kotor": 2, "tidak_ada_bau": 2, "tidak_ada_jorok": 2,
 
     # ── Negatif fatal ─────────────────────────────────────────────────────────
     "sampah": -4, "pungli": -5, "kumuh": -3, "bau": -3, "jorok": -3, 
@@ -212,6 +213,7 @@ CUSTOM_DOMAIN_LEXICON = {
     "tidak_mantap": -2, "tidak_ada": -1, "tidak_bisa": -1,
     "kurang_nyaman": -1, "kurang_bagus": -1, "kurang_bersih": -2, 
     "kurang_puas": -2, "kurang_tata": -1,
+    "tidak_ada_fasilitas": -2, "tidak_ada_kamar_mandi": -1, "tidak_ada_toilet": -1,
 }
 
 def _normalize_lexicon_word(word):
@@ -348,7 +350,7 @@ STOPWORD_TAMBAHAN.discard("tertawa")
 # ══════════════════════════════════════════════════════════════════════════════
 # KATA NEGASI — kata yang memicu penggabungan token
 # ══════════════════════════════════════════════════════════════════════════════
-KATA_NEGASI = {"tidak", "bukan", "jangan", "kurang", "belum"}
+KATA_NEGASI = {"tidak", "bukan", "jangan", "kurang", "belum", "tidak_ada"}
 
 # ══════════════════════════════════════════════════════════════════════════════
 # PROTECTED WORDS — kata yang TIDAK boleh di-stem oleh Sastrawi

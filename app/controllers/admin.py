@@ -9,7 +9,13 @@ from sqlalchemy import func
 from app import db
 from app.models import Ulasan, RiwayatTraining
 from app.lib.preprocessing import preprocess_text, label_sentiment, preprocess_debug_steps
-from app.lib.machine_learning import train_naive_bayes, predict_single, predict_single_clean, MODEL_PATH
+from app.lib.machine_learning import (
+    train_naive_bayes,
+    predict_single,
+    predict_single_clean,
+    MODEL_PATH,
+    build_smote_simulation_details,
+)
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 SMOTE_METADATA_PATH = os.path.join(BASE_DIR, 'smote_metadata.json')
@@ -182,11 +188,14 @@ def load_model_details(top_n=10, likelihood_top_n=5):
             'class_scores': class_scores
         }
 
+    smote_simulation = build_smote_simulation_details(vectorizer, top_n=5)
+
     return {
         'tfidf_top': tfidf_top,
         'priors': priors,
         'likelihoods': likelihoods,
-        'simulation': simulation
+        'simulation': simulation,
+        'smote_simulation': smote_simulation
     }
 
 @admin_bp.route('/dashboard')

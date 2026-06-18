@@ -2,7 +2,10 @@
 <div class="row mb-4">
   <div class="col-md-6">
     <div class="card shadow-sm border-0">
-      <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #4f46e5, #06b6d4)">
+      <div
+        class="card-header bg-gradient text-white"
+        style="background: linear-gradient(135deg, #4f46e5, #06b6d4)"
+      >
         <h5 class="mb-0"><i class="fas fa-cog"></i> Konfigurasi Training</h5>
       </div>
       <div class="card-body">
@@ -32,9 +35,15 @@
           </li>
         </ul>
 
-        <form action="{{ url_for('admin.proses_training') }}" method="POST" class="mt-4">
+        <form
+          action="{{ url_for('admin.proses_training') }}"
+          method="POST"
+          class="mt-4"
+        >
           <div class="mb-3">
-            <label class="form-label fw-bold">Split Data (Training:Testing)</label>
+            <label class="form-label fw-bold"
+              >Split Data (Training:Testing)</label
+            >
             <select name="split_ratio" class="form-select" required>
               <option value="90:10" {% if split_selected=='90:10' %}selected{% endif %}>90:10</option>
               <option value="85:15" {% if split_selected=='85:15' %}selected{% endif %}>85:15</option>
@@ -100,7 +109,9 @@
       </div>
       <div class="card-body">
         <div class="table-responsive">
-          <table class="table table-hover table-bordered text-center align-middle">
+          <table
+            class="table table-hover table-bordered text-center align-middle"
+          >
             <thead class="table-light">
               <tr>
                 <th>Label</th>
@@ -181,11 +192,13 @@
               </tr>
             </thead>
             <tbody>
-              {% for row in hasil.confusion_matrix %}
+              {% for row in hasil.confusion_matrix %} 
               {% set row_idx = loop.index0 %}
               <tr>
-                <th class="table-light fw-bold">{{ hasil.labels[loop.index0]|capitalize }}</th>
-                {% for val in row %}
+                <th class="table-light fw-bold">
+                  {{ hasil.labels[loop.index0]|capitalize }}
+                </th>
+                {% for val in row %} 
                 {% set col_idx = loop.index0 %}
                 <td class="{% if row_idx == col_idx %}bg-success text-white fw-bold{% endif %}">
                   {{ val }}
@@ -201,8 +214,7 @@
             <i class="fas fa-info-circle"></i> <strong>Keterangan:</strong><br />
             • <strong>Baris</strong> = Label Sebenarnya (Aktual)<br />
             • <strong>Kolom</strong> = Label Prediksi Model<br />
-            • <strong>Kotak Hijau</strong> = Prediksi Benar (True
-            Positive/Negative)
+            • <strong>Kotak Hijau</strong> = Prediksi Benar (True Positive/Negative)
           </small>
         </div>
       </div>
@@ -215,13 +227,23 @@
     <div class="accordion" id="detailAccordion">
       <div class="accordion-item">
         <h2 class="accordion-header" id="headingDetail">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-            data-bs-target="#collapseDetail" aria-expanded="false" aria-controls="collapseDetail">
+          <button
+            class="accordion-button collapsed"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#collapseDetail"
+            aria-expanded="false"
+            aria-controls="collapseDetail"
+          >
             Bongkar Proses AI
           </button>
         </h2>
-        <div id="collapseDetail" class="accordion-collapse collapse" aria-labelledby="headingDetail"
-          data-bs-parent="#detailAccordion">
+        <div
+          id="collapseDetail"
+          class="accordion-collapse collapse"
+          aria-labelledby="headingDetail"
+          data-bs-parent="#detailAccordion"
+        >
           <div class="accordion-body">
             {% if model_details %}
             <div class="mb-4">
@@ -310,7 +332,7 @@
             </div>
 
             <div>
-              <h5 class="fw-bold mb-3">Bagian 4: Simulasi </h5>
+              <h5 class="fw-bold mb-3">Bagian 4: Simulasi</h5>
               {% if model_details.simulation %}
               <div class="alert alert-info">
                 <strong>Kalimat Uji:</strong> {{ model_details.simulation.text
@@ -393,21 +415,20 @@
   </div>
 </div>
 
-{% endif %}
-
-{% if smote_data and smote_data.sebelum and smote_data.sesudah %}
+{% endif %} {% if smote_data and smote_data.sebelum and smote_data.sesudah %}
 <div class="card shadow-sm border-0 mb-4">
   <div class="card-header bg-dark text-white d-flex align-items-center">
-    <h5 class="mb-0"><i class="fas fa-balance-scale me-2"></i> Distribusi Kelas & Balancing (SMOTE)</h5>
+    <h5 class="mb-0">
+      <i class="fas fa-balance-scale me-2"></i> Distribusi Kelas & Balancing
+      (SMOTE)
+    </h5>
   </div>
   <div class="card-body p-4">
-    {% set ns = namespace(max_val=1) %}
-    {% for label, count in smote_data.sebelum.items() %}
-    {% if count > ns.max_val %}{% set ns.max_val = count %}{% endif %}
-    {% endfor %}
-    {% for label, count in smote_data.sesudah.items() %}
-    {% if count > ns.max_val %}{% set ns.max_val = count %}{% endif %}
-    {% endfor %}
+    {% set ns = namespace(max_val=1) %} {% for label, count in
+    smote_data.sebelum.items() %} {% if count > ns.max_val %}{% set ns.max_val =
+    count %}{% endif %} {% endfor %} {% for label, count in
+    smote_data.sesudah.items() %} {% if count > ns.max_val %}{% set ns.max_val =
+    count %}{% endif %} {% endfor %}
 
     <div class="row g-4">
       <!-- Sebelum SMOTE -->
@@ -416,24 +437,38 @@
           <i class="fas fa-history me-1.5"></i> Sebelum SMOTE (Data Asli)
         </h6>
         <div class="px-2">
-          {% for label, jumlah in smote_data.sebelum.items() %}
-          {% set pct = (jumlah / ns.max_val * 100) | round | int if ns.max_val > 0 else 0 %}
-          {% if label|lower == 'positif' %}
-          {% set bar_color = 'bg-success' %}
-          {% elif label|lower == 'negatif' %}
-          {% set bar_color = 'bg-danger' %}
-          {% else %}
-          {% set bar_color = 'bg-warning' %}
-          {% endif %}
+          {% for label, jumlah in smote_data.sebelum.items() %} {% set pct =
+          (jumlah / ns.max_val * 100) | round | int if ns.max_val > 0 else 0 %}
+          {% if label|lower == 'positif' %} {% set bar_color = 'bg-success' %}
+          {% elif label|lower == 'negatif' %} {% set bar_color = 'bg-danger' %}
+          {% else %} {% set bar_color = 'bg-warning' %} {% endif %}
           <div class="mb-3">
             <div class="d-flex justify-content-between align-items-center mb-1">
-              <span class="fw-semibold text-capitalize" style="font-size: 0.9rem;">{{ label }}</span>
-              <span class="badge bg-light text-dark border px-2.5 py-1 fw-bold">{{ jumlah }} data</span>
+              <span
+                class="fw-semibold text-capitalize"
+                style="font-size: 0.9rem"
+                >{{ label }}</span
+              >
+              <span class="badge bg-light text-dark border px-2.5 py-1 fw-bold"
+                >{{ jumlah }} data</span
+              >
             </div>
-            <div class="progress" style="height: 10px; background-color: #f1f5f9; border-radius: 6px;">
-              <div class="progress-bar {{ bar_color }} progress-bar-striped" role="progressbar"
-                style="{{ 'width: ' ~ pct ~ '%; border-radius: 6px;' }}" aria-valuenow="{{ pct }}" aria-valuemin="0"
-                aria-valuemax="100"></div>
+            <div
+              class="progress"
+              style="
+                height: 10px;
+                background-color: #f1f5f9;
+                border-radius: 6px;
+              "
+            >
+              <div
+                class="progress-bar {{ bar_color }} progress-bar-striped"
+                role="progressbar"
+                style="{{ 'width: ' ~ pct ~ '%; border-radius: 6px;' }}"
+                aria-valuenow="{{ pct }}"
+                aria-valuemin="0"
+                aria-valuemax="100"
+              ></div>
             </div>
           </div>
           {% endfor %}
@@ -446,25 +481,39 @@
           <i class="fas fa-magic me-1.5"></i> Sesudah SMOTE (Seimbang)
         </h6>
         <div class="px-2">
-          {% for label, jumlah in smote_data.sesudah.items() %}
-          {% set pct = (jumlah / ns.max_val * 100) | round | int if ns.max_val > 0 else 0 %}
-          {% if label|lower == 'positif' %}
-          {% set bar_color = 'bg-success' %}
-          {% elif label|lower == 'negatif' %}
-          {% set bar_color = 'bg-danger' %}
-          {% else %}
-          {% set bar_color = 'bg-warning' %}
-          {% endif %}
+          {% for label, jumlah in smote_data.sesudah.items() %} {% set pct =
+          (jumlah / ns.max_val * 100) | round | int if ns.max_val > 0 else 0 %}
+          {% if label|lower == 'positif' %} {% set bar_color = 'bg-success' %}
+          {% elif label|lower == 'negatif' %} {% set bar_color = 'bg-danger' %}
+          {% else %} {% set bar_color = 'bg-warning' %} {% endif %}
           <div class="mb-3">
             <div class="d-flex justify-content-between align-items-center mb-1">
-              <span class="fw-semibold text-capitalize" style="font-size: 0.9rem;">{{ label }}</span>
-              <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 fw-bold">{{
-                jumlah }} data</span>
+              <span
+                class="fw-semibold text-capitalize"
+                style="font-size: 0.9rem"
+                >{{ label }}</span
+              >
+              <span
+                class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 fw-bold"
+                >{{ jumlah }} data</span
+              >
             </div>
-            <div class="progress" style="height: 10px; background-color: #f1f5f9; border-radius: 6px;">
-              <div class="progress-bar {{ bar_color }} progress-bar-striped progress-bar-animated" role="progressbar"
-                style="{{ 'width: ' ~ pct ~ '%; border-radius: 6px;' }}" aria-valuenow="{{ pct }}" aria-valuemin="0"
-                aria-valuemax="100"></div>
+            <div
+              class="progress"
+              style="
+                height: 10px;
+                background-color: #f1f5f9;
+                border-radius: 6px;
+              "
+            >
+              <div
+                class="progress-bar {{ bar_color }} progress-bar-striped progress-bar-animated"
+                role="progressbar"
+                style="{{ 'width: ' ~ pct ~ '%; border-radius: 6px;' }}"
+                aria-valuenow="{{ pct }}"
+                aria-valuemin="0"
+                aria-valuemax="100"
+              ></div>
             </div>
           </div>
           {% endfor %}
@@ -472,14 +521,21 @@
       </div>
     </div>
 
-    <div class="alert alert-warning border-0 mt-4 mb-0 p-3"
-      style="background-color: #fffbeb; border-radius: 12px; font-size: 0.85rem;">
+    <div
+      class="alert alert-warning border-0 mt-4 mb-0 p-3"
+      style="background-color: #fffbeb; border-radius: 12px; font-size: 0.85rem"
+    >
       <div class="d-flex gap-2">
-        <i class="fas fa-info-circle mt-1 text-warning" style="font-size: 1.1rem;"></i>
-        <span class="text-warning-emphasis" style="line-height: 1.45;">
-          <strong>SMOTE (Synthetic Minority Over-sampling Technique)</strong> bekerja dengan menduplikasi data sintetis
-          pada kelas minoritas (Positif & Netral) secara cerdas menggunakan tetangga terdekat (KNN) sehingga jumlah data
-          berimbang dengan kelas mayoritas (Negatif). Hal ini mencegah bias prediksi pada model.
+        <i
+          class="fas fa-info-circle mt-1 text-warning"
+          style="font-size: 1.1rem"
+        ></i>
+        <span class="text-warning-emphasis" style="line-height: 1.45">
+          <strong>SMOTE (Synthetic Minority Over-sampling Technique)</strong>
+          bekerja dengan menduplikasi data sintetis pada kelas minoritas
+          (Positif & Netral) secara cerdas menggunakan tetangga terdekat (KNN)
+          sehingga jumlah data berimbang dengan kelas mayoritas (Negatif). Hal
+          ini mencegah bias prediksi pada model.
         </span>
       </div>
     </div>
@@ -490,12 +546,75 @@
 <div class="row mb-4">
   <div class="col-md-12">
     <div class="card shadow-sm border-0">
+      <div class="card-header bg-info text-white">
+        <h5 class="mb-0">
+          <i class="fas fa-project-diagram"></i> Simulasi Pembuatan Data Sintetis SMOTE
+        </h5>
+      </div>
+      <div class="card-body">
+        {% if model_details.smote_simulation %}
+        <div class="alert alert-light border mb-3">
+          <strong>Kelas minoritas yang dipakai:</strong> {{ model_details.smote_simulation.minority_label|capitalize }}
+          <br />
+          <strong>Faktor interpolasi contoh:</strong> {{ "%.2f"|format(model_details.smote_simulation.interpolation_factor) }}
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Status Data</th>
+                <th>Fitur Kata & Bobot TF-IDF</th>
+                <th>Label Sentimen</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in model_details.smote_simulation.rows %}
+              <tr>
+                <td class="fw-bold">
+                  {{ item.status_data }}
+                </td>
+                <td>{{ item.fitur_kata_bobot }}</td>
+                <td>
+                  {% if item.label_sentimen|lower == 'positif' %}
+                  <span class="badge bg-success">{{ item.label_sentimen|capitalize }}</span>
+                  {% elif item.label_sentimen|lower == 'negatif' %}
+                  <span class="badge bg-danger">{{ item.label_sentimen|capitalize }}</span>
+                  {% else %}
+                  <span class="badge bg-secondary">{{ item.label_sentimen|capitalize }}</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="alert alert-info mt-3 mb-0">
+          <small>
+            Baris pertama adalah data asli kelas minoritas, baris kedua adalah tetangga terdekatnya, dan baris ketiga adalah contoh data sintetis hasil interpolasi SMOTE.
+          </small>
+        </div>
+        {% else %}
+        <p class="text-muted mb-0">
+          Simulasi SMOTE belum tersedia. Pastikan model sudah dilatih dan kelas minoritas memiliki minimal 2 data berlabel.
+        </p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mb-4">
+  <div class="col-md-12">
+    <div class="card shadow-sm border-0">
       <div class="card-header bg-secondary text-white">
         <h5 class="mb-0"><i class="fas fa-history"></i> Riwayat Training</h5>
       </div>
       <div class="card-body">
         <div class="table-responsive">
-          <table class="table table-bordered table-striped text-center align-middle">
+          <table
+            class="table table-bordered table-striped text-center align-middle"
+          >
             <thead class="table-light">
               <tr>
                 <th>Tanggal Training</th>
@@ -513,8 +632,10 @@
                 <td>{{ item.rasio_split }}</td>
                 <td>{{ item.akurasi }}%</td>
                 <td>
-                  <a href="{{ url_for('admin.riwayat_training_detail', riwayat_id=item.id) }}"
-                    class="btn btn-sm btn-outline-primary">
+                  <a
+                    href="{{ url_for('admin.riwayat_training_detail', riwayat_id=item.id) }}"
+                    class="btn btn-sm btn-outline-primary"
+                  >
                     Lihat Detail
                   </a>
                 </td>
@@ -532,26 +653,44 @@
         {% if pagination and pagination.pages > 1 %}
         <nav aria-label="Riwayat Training Pagination" class="mt-3">
           <ul class="pagination justify-content-center mb-0">
-            <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+            <li
+              class="page-item {% if not pagination.has_prev %}disabled{% endif %}"
+            >
               {% if pagination.has_prev %}
-              <a class="page-link" href="{{ url_for('admin.training_model', page=pagination.prev_num) }}">Sebelumnya</a>
+              <a
+                class="page-link"
+                href="{{ url_for('admin.training_model', page=pagination.prev_num) }}"
+                >Sebelumnya</a
+              >
               {% else %}
               <span class="page-link">Sebelumnya</span>
               {% endif %}
             </li>
             {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1,
             left_current=2, right_current=2) %} {% if page_num %}
-            <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
-              <a class="page-link" href="{{ url_for('admin.training_model', page=page_num) }}">{{ page_num }}</a>
+            <li
+              class="page-item {% if page_num == pagination.page %}active{% endif %}"
+            >
+              <a
+                class="page-link"
+                href="{{ url_for('admin.training_model', page=page_num) }}"
+                >{{ page_num }}</a
+              >
             </li>
             {% else %}
             <li class="page-item disabled">
               <span class="page-link">...</span>
             </li>
             {% endif %} {% endfor %}
-            <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+            <li
+              class="page-item {% if not pagination.has_next %}disabled{% endif %}"
+            >
               {% if pagination.has_next %}
-              <a class="page-link" href="{{ url_for('admin.training_model', page=pagination.next_num) }}">Berikutnya</a>
+              <a
+                class="page-link"
+                href="{{ url_for('admin.training_model', page=pagination.next_num) }}"
+                >Berikutnya</a
+              >
               {% else %}
               <span class="page-link">Berikutnya</span>
               {% endif %}

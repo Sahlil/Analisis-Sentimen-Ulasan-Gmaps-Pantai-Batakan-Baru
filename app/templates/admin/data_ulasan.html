@@ -59,6 +59,7 @@
           <tr>
             <th width="5%">No</th>
             <th>Teks Ulasan Asli</th>
+            <th width="15%">Label</th>
             <th width="15%">Tanggal Input</th>
             <th width="10%">Aksi</th>
           </tr>
@@ -71,6 +72,7 @@
               if pagination else 0) }}
             </td>
             <td>{{ item.teks_asli }}</td>
+            <td>{{ item.label }}</td>
             <td>{{ item.tanggal_input.strftime('%d-%m-%Y') }}</td>
             <td>
               <div class="d-flex gap-2">

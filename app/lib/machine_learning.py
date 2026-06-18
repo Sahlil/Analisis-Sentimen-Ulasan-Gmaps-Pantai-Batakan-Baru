@@ -2,10 +2,12 @@ import pickle
 import os
 import json
 import pandas as pd
+import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn.neighbors import NearestNeighbors
 from app import db
 from app.models import Ulasan, RiwayatTraining
 from imblearn.over_sampling import SMOTE
@@ -48,7 +50,6 @@ def train_naive_bayes(test_size=0.2, train_size=None, split_ratio=None):
     if train_size is not None:
         split_kwargs['train_size'] = train_size
 
-    # Split data SEBELUM vektorisasi untuk menghindari data leakage
     df_train, df_test, y_train, y_test = train_test_split(df, y, **split_kwargs)
 
     # fit_transform hanya pada data training, transform saja pada data testing
@@ -155,13 +156,131 @@ def save_smote_metadata(data_before, data_after):
 
     with open(SMOTE_METADATA_PATH, 'w', encoding='utf-8') as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
+
+
+def _format_top_terms(vector_row, feature_names, top_n=5):
+    dense_vector = vector_row.toarray().ravel() if hasattr(vector_row, 'toarray') else np.asarray(vector_row).ravel()
+    nonzero_indices = np.flatnonzero(dense_vector)
+
+    if nonzero_indices.size == 0:
+        return []
+
+    ranked_indices = nonzero_indices[np.argsort(dense_vector[nonzero_indices])[::-1][:top_n]]
+    return [
+        {
+            'term': feature_names[index],
+            'weight': float(dense_vector[index])
+        }
+        for index in ranked_indices
+    ]
+
+
+def _terms_to_text(top_terms):
+    if not top_terms:
+        return '-'
+
+    return ', '.join(
+        f"{item['term']} ({item['weight']:.4f})"
+        for item in top_terms
+    )
+
+
+def build_smote_simulation_details(vectorizer, top_n=5, preferred_label='Netral'):
+    data = Ulasan.query.filter(Ulasan.teks_clean != None, Ulasan.label != None).all()
+
+    if not data:
+        return None
+
+    df = pd.DataFrame([{
+        'id': row.id,
+        'text': row.teks_clean,
+        'label': row.label,
+        'text_raw': row.teks_asli
+    } for row in data])
+
+    label_counts = df['label'].value_counts()
+    if label_counts.empty:
+        return None
+
+    minority_label = None
+    if preferred_label and preferred_label in label_counts and label_counts[preferred_label] >= 2:
+        minority_label = preferred_label
+    else:
+        valid_labels = label_counts[label_counts >= 2].sort_values(kind='mergesort')
+        if not valid_labels.empty:
+            minority_label = valid_labels.index[0]
+
+    if minority_label is None:
+        return None
+
+    minority_df = df[df['label'] == minority_label].sort_values('id').reset_index(drop=True)
+    if len(minority_df) < 2:
+        return None
+
+    minority_vectors = vectorizer.transform(minority_df['text'])
+    if minority_vectors.shape[0] < 2:
+        return None
+
+    nearest_neighbors = NearestNeighbors(n_neighbors=2, metric='cosine')
+    nearest_neighbors.fit(minority_vectors)
+
+    anchor_position = 0
+    anchor_vector = minority_vectors[anchor_position]
+    _, neighbor_indices = nearest_neighbors.kneighbors(anchor_vector, n_neighbors=2)
+
+    if neighbor_indices.shape[1] < 2:
+        return None
+
+    neighbor_position = int(neighbor_indices[0][1])
+    if neighbor_position == anchor_position:
+        return None
+
+    feature_names = vectorizer.get_feature_names_out()
+    anchor_dense = anchor_vector.toarray().ravel()
+    neighbor_vector = minority_vectors[neighbor_position]
+    neighbor_dense = neighbor_vector.toarray().ravel()
+
+    interpolation_factor = 0.5
+    synthetic_dense = anchor_dense + interpolation_factor * (neighbor_dense - anchor_dense)
+
+    anchor_terms = _format_top_terms(anchor_vector, feature_names, top_n=top_n)
+    neighbor_terms = _format_top_terms(neighbor_vector, feature_names, top_n=top_n)
+    synthetic_terms = _format_top_terms(synthetic_dense, feature_names, top_n=top_n)
+
+    return {
+        'minority_label': minority_label,
+        'interpolation_factor': interpolation_factor,
+        'rows': [
+            {
+                'status_data': 'Data Asli',
+                'label_sentimen': minority_df.iloc[anchor_position]['label'],
+                'fitur_kata_bobot': _terms_to_text(anchor_terms),
+                'top_terms': anchor_terms,
+                'teks_asli': minority_df.iloc[anchor_position]['text_raw']
+            },
+            {
+                'status_data': 'Data Tetangga',
+                'label_sentimen': minority_df.iloc[neighbor_position]['label'],
+                'fitur_kata_bobot': _terms_to_text(neighbor_terms),
+                'top_terms': neighbor_terms,
+                'teks_asli': minority_df.iloc[neighbor_position]['text_raw']
+            },
+            {
+                'status_data': 'Hasil SMOTE Sintetis',
+                'label_sentimen': minority_label,
+                'fitur_kata_bobot': _terms_to_text(synthetic_terms),
+                'top_terms': synthetic_terms,
+                'teks_asli': None
+            }
+        ]
+    }
  
 def predict_single(text_raw):
     try:
         with open(MODEL_PATH, 'rb') as f:
             vectorizer, clf = pickle.load(f)
 
-        tokens = preprocess_text(text_raw)
+        tokens = kw(text_raw)
         text_clean = " ".join(tokens)
 
         vec = vectorizer.transform([text_clean])
