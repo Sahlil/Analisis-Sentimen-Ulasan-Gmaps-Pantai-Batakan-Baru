@@ -20,7 +20,7 @@ Thumbs.db
 *.log
 
 # Model artifacts
-model_storage/
+model_storage/sentiment_model.pkl
 
 # VS Code
 .vscode/
@@ -60,7 +60,7 @@ tmp/
 
 # Mengabaikan model Machine Learning (Naive Bayes) yang nilainya bisa berubah
 *.pkl
-model_storage/
 
 laporan.md
 smote_metadata.json
+venv/pyvenv.cfg
