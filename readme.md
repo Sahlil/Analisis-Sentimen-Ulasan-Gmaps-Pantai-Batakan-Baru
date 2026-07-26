@@ -49,7 +49,7 @@ Aplikasi web berbasis Flask untuk mengelola ulasan, melakukan preprocessing baha
    ```
 3. Install dependensi:
    ```bash
-   pip install flask flask_sqlalchemy flask_login pymysql pandas numpy scikit-learn imbalanced-learn sastrawi nltk openpyxl python-dotenv
+   pip install -r requirements.txt
    ```
 4. Buat database MySQL sesuai konfigurasi (contoh: `ta_db`).
 5. Jalankan seeder untuk membuat akun awal:
