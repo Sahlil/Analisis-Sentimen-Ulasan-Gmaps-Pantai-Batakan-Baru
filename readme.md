@@ -83,7 +83,7 @@ Dokumen ini berisi rangkuman dan penjelasan singkat mengenai fungsi dari setiap 
 
 ---
 
-## 🌐 Web Framework & Server (Flask Ecosystem)
+## Web Framework & Server (Flask Ecosystem)
 
 | Library | Versi | Deskripsi Singkat |
 | :--- | :--- | :--- |
@@ -97,7 +97,7 @@ Dokumen ini berisi rangkuman dan penjelasan singkat mengenai fungsi dari setiap 
 
 ---
 
-## 🗄️ Database & ORM
+## Database & ORM
 
 | Library | Versi | Deskripsi Singkat |
 | :--- | :--- | :--- |
@@ -107,7 +107,7 @@ Dokumen ini berisi rangkuman dan penjelasan singkat mengenai fungsi dari setiap 
 
 ---
 
-## 🧠 Machine Learning & Data Science
+## Machine Learning & Data Science
 
 | Library | Versi | Deskripsi Singkat |
 | :--- | :--- | :--- |
@@ -122,7 +122,7 @@ Dokumen ini berisi rangkuman dan penjelasan singkat mengenai fungsi dari setiap 
 
 ---
 
-## 💬 Natural Language Processing (NLP) & Pemrosesan Teks
+## Natural Language Processing (NLP) & Pemrosesan Teks
 
 | Library | Versi | Deskripsi Singkat |
 | :--- | :--- | :--- |
@@ -132,7 +132,7 @@ Dokumen ini berisi rangkuman dan penjelasan singkat mengenai fungsi dari setiap 
 
 ---
 
-## 🛠️ Utilitas, Format File & Manajemen Sistem
+## Utilitas, Format File & Manajemen Sistem
 
 | Library | Versi | Deskripsi Singkat |
 | :--- | :--- | :--- |
